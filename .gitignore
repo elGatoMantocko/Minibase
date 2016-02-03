@@ -68,3 +68,6 @@ fabric.properties
 
 #macs...
 .DS_Store
+
+#ignore swap files
+*.swp
