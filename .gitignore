@@ -66,3 +66,6 @@ fabric.properties
 
 #ignore swap files
 *.swp
+
+# ignore local vimrc files
+.vimrc
