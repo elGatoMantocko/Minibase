@@ -8,6 +8,5 @@ dependencies:
 
 test:
   override:
-    - cd BufMgr
-    - make test
+    - cd BufMgr; make test
 
