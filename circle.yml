@@ -1,0 +1,13 @@
+machine:
+  java:
+    version: oraclejdk8
+
+dependencies:
+  pre:
+    - sudo apt-get update; sudo apt-get install junit4
+
+test:
+  override:
+    - cd BufMgr; make test
+    - cd Heap; make test
+
