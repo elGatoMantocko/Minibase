@@ -35,7 +35,7 @@ public class HFDriverTest {
         assertTrue("Test 2 had an error", mDriver.test2());
     }
 
-    @Test
+    @Test(timeout = 1000L) //This tests contains a while loop that can be infinite.
     public void testTest3() throws Exception {
         assertTrue("Test 3 had an error", mDriver.test3());
     }
