@@ -2,6 +2,7 @@ package tests;
 
 import org.junit.Before;
 import org.junit.Test;
+import tests.BMDriver;
 
 import static org.junit.Assert.*;
 
