@@ -6,6 +6,8 @@ CLASSPATH = .:..:$(LIBPATH):$(JUNITPATH)
 BINPATH = $(JDKPATH)/bin
 JAVAC = $(JDKPATH)/bin/javac 
 JAVA  = $(JDKPATH)/bin/java 
+
+TEST_PACKAGE=tests.
 TEST_DIR=./test/tests
 TEST_NAMES=BMDriverTest
 TEST_FILES=$(TEST_NAMES:=.java)
@@ -21,13 +23,13 @@ compile:src/*/*.java
 	$(JAVAC) -cp $(CLASSPATH) -d bin src/*/*.java
 
 test: $(TEST_CLASSES)
-	$(JAVA) -cp $(CLASSPATH) org.junit.runner.JUnitCore $(TEST_NAMES)
+	$(JAVA) -cp $(CLASSPATH):bin:bin/tests org.junit.runner.JUnitCore $(TEST_PACKAGE)$(TEST_NAMES)
 
 xx : compile
 	$(JAVA) -cp $(CLASSPATH):bin tests.BMTest
 
 $(TEST_CLASSES): compile $(TEST_SOURCES)
-	$(JAVAC) -cp $(CLASSPATH):bin/tests -d bin $(TEST_SOURCES)
+	$(JAVAC) -cp $(CLASSPATH) -d bin $(TEST_SOURCES)
 
 clean:
 	rm -rf ./bin
