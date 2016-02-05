@@ -1,8 +1,8 @@
 package heap;
 
+import global.Page;
 import global.PageId;
 import global.RID;
-import sun.jvm.hotspot.debugger.Page;
 
 /**
  * Created by david on 2/5/16.
@@ -11,13 +11,11 @@ public class HFPage extends Page {
 
 
     public HFPage(long baseAddress, long unmappedPageLength) {
-        super(baseAddress, unmappedPageLength);
     }
 
-    //TODO: Determine how to make the constructor
-//    public heap.HFPage(Page page) {
-//
-//    }
+    public HFPage(Page page) {
+
+    }
 
     //Deletes a record from the page, compacting the records space.
     void deleteRecord(RID rid) {
