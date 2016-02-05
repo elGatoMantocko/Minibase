@@ -8,6 +8,6 @@ dependencies:
 
 test:
   override:
-    - ./test.sh:
-      parallel: true
+    - cd BufMgr
+    - make test
 
