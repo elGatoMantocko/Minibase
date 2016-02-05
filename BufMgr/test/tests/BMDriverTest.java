@@ -46,3 +46,4 @@ public class BMDriverTest {
         assertTrue("Test 6 had an error", mDriver.test6());
     }
 }
+
