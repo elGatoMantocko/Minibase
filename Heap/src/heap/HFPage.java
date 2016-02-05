@@ -100,7 +100,7 @@ public class HFPage extends Page {
     }
 
     //    Selects a record from the page.
-    public byte[] selectRecord(RID rid) {
+    public Tuple selectRecord(RID rid) {
         return null;
     }
 
