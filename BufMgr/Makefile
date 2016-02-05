@@ -29,7 +29,7 @@ xx : compile
 	$(JAVA) -cp $(CLASSPATH):bin tests.BMTest
 
 $(TEST_CLASSES): compile $(TEST_SOURCES)
-	$(JAVAC) -cp $(CLASSPATH) -d bin $(TEST_SOURCES)
+	$(JAVAC) -cp $(CLASSPATH):bin -d bin $(TEST_SOURCES)
 
 clean:
 	rm -rf ./bin
