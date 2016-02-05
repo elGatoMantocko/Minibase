@@ -1,5 +1,7 @@
 package heap;
 
+import chainexception.ChainException;
+import com.sun.net.httpserver.Filter;
 import global.GlobalConst;
 import global.RID;
 
@@ -11,7 +13,7 @@ public class HeapFile implements GlobalConst {
 
     }
 
-    public RID insertRecord(byte[] record) {
+    public RID insertRecord(byte[] record) throws ChainException {
         return null;
     }
 
@@ -19,12 +21,12 @@ public class HeapFile implements GlobalConst {
         return null;
     }
 
-    public void updateRecord(RID rid, Tuple newRecord) {
-
+    public boolean updateRecord(RID rid, Tuple newRecord) throws ChainException {
+        return false;
     }
 
-    public void deleteRecord(RID rid) {
-
+    public boolean deleteRecord(RID rid) {
+        return false;
     }
 
     //get number of records in the file

@@ -838,7 +838,7 @@ class DummyRecord  {
 
 	/** constructor: translate a tuple to a DummyRecord object
 	 *  it will make a copy of the data in the tuple
-	 * @param atuple: the input tuple
+	 * @param _atuple: the input tuple
 	 */
 	public DummyRecord(Tuple _atuple) 
 	throws java.io.IOException{   

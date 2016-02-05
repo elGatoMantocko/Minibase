@@ -1,5 +1,6 @@
 package heap;
 
+import chainexception.ChainException;
 import global.GlobalConst;
 import global.RID;
 
@@ -11,7 +12,7 @@ public class HeapScan implements GlobalConst {
 
     }
 
-    public void close() {
+    public void close() throws ChainException {
 
     }
 
