@@ -6,14 +6,24 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Created by david on 2/3/16.
+ * Created by david on 2/5/16.
  */
-public class BMDriverTest {
-    BMDriver mDriver;
+public class HFDriverTest {
+
+    HFDriver mDriver;
     @Before
     public void setUp() throws Exception {
-        mDriver = new BMDriver();
+        mDriver = new HFDriver();
     }
+
+    /**
+     * Redundant test because it seems to write to come outfiles.
+     * @throws Exception
+     */
+//    @Test
+//    public void testrunTests() throws Exception {
+//        mDriver.runTests();
+//    }
 
     @Test
     public void testTest1() throws Exception {
