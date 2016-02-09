@@ -1,6 +1,7 @@
 package bufmgr;
 
 import chainexception.ChainException;
+import global.Minibase;
 import global.Page;
 import global.PageId;
 
@@ -8,18 +9,23 @@ import global.PageId;
  * Created by david on 2/3/16.
  */
 public class BufMgr {
+
     /**
      * Create the BufMgr object.
      * Allocate pages (frames) for the buffer pool in main memory and
      * make the buffer manage aware that the replacement policy is
      * specified by replacerArg (e.g., LH, Clock, LRU, MRU, LFU, etc.).
      *
-     * @param numbufs number of buffers in the buffer pool
-     * @param lookAheadSize: Please ignore this parameter
+     * @param numbufs           number of buffers in the buffer pool
+     * @param lookAheadSize:    Please ignore this parameter
      * @param replacementPolicy Name of the replacement policy, that parameter will be set to "LFU" (you
-    can safely ignore this parameter as you will implement only one policy)
+     *                          can safely ignore this parameter as you will implement only one policy)
      */
-    public BufMgr(int numbufs, int lookAheadSize, String replacementPolicy) {};
+    public BufMgr(int numbufs, int lookAheadSize, String replacementPolicy) {
+        //Allocate an array of buffers with given size.
+        //save numbufs.
+    }
+
     /**
      * Pin a page.
      * First check if this page is already in the buffer pool.
@@ -34,11 +40,17 @@ public class BufMgr {
      * before reading new page.__ (You can assume that emptyPage==false for
      * this assignment.)
      *
-     * @param pageno page number in the Minibase.
-     * @param page the pointer point to the page.
+     * @param pageno    page number in the Minibase.
+     * @param page      the pointer point to the page.
      * @param emptyPage true (empty page); false (non-empty page)
      */
-    public void pinPage(PageId pageno, Page page, boolean emptyPage) throws ChainException {};
+    public void pinPage(PageId pageno, Page page, boolean emptyPage) throws ChainException {
+        //check if already exists in pool.
+        //if true, increment pincount
+        //if false
+        //Load page into replacement candidate. (while writing old page if dirty).
+    }
+
     /**
      * Unpin a page specified by a pageId.
      * This method should be called with dirty==true if the client has
@@ -47,15 +59,24 @@ public class BufMgr {
      * for this frame.
      * Further, if pin_count>0, this method should
      * decrement it.
-     *If pin_count=0 before this call, throw an exception
+     * If pin_count=0 before this call, throw an exception
      * to report error.
-     *(For testing purposes, we ask you to throw
+     * (For testing purposes, we ask you to throw
      * an exception named PageUnpinnedException in case of error.)
      *
      * @param pageno page number in the Minibase.
-     * @param dirty the dirty bit of the frame
+     * @param dirty  the dirty bit of the frame
      */
-    public void unpinPage(PageId pageno, boolean dirty) throws ChainException{};
+    public void unpinPage(PageId pageno, boolean dirty) throws ChainException /*, PageUnpinnedException*/ {
+        //if pincount == 0
+            //error
+
+        //set page the dirty
+        //if pincount > 0
+            //pincount--;
+
+    }
+
     /**
      * Allocate new pages.
      * Call DB object to allocate a run of new pages and
@@ -66,11 +87,17 @@ public class BufMgr {
      * all these pages, and return null.
      *
      * @param firstpage the address of the first page.
-     * @param howmany total number of allocated new pages.
-     *
+     * @param howmany   total number of allocated new pages.
      * @return the first page id of the new pages.__ null, if error.
      */
-    public PageId newPage(Page firstpage, int howmany) {return null;};
+    public PageId newPage(Page firstpage, int howmany) {
+        //allocate page in diskManager.
+        //Load first page into memory
+        //pin it.
+
+        return null;
+    }
+
     /**
      * This method should be called to delete a page that is on disk.
      * This routine must call the method in diskmgr package to
@@ -78,25 +105,41 @@ public class BufMgr {
      *
      * @param globalPageId the page number in the data base.
      */
-    public void freePage(PageId globalPageId) throws ChainException {};
+    public void freePage(PageId globalPageId) throws ChainException {
+        //QUESTION: Should this check/clear the buffer? Should it respect pinned status?
+        //run diskmgr.deallocate*
+    }
+
     /**
      * Used to flush a particular page of the buffer pool to disk.
      * This method calls the write_page method of the diskmgr package.
      *
      * @param pageid the page number in the database.
      */
-    public void flushPage(PageId pageid) {};
+    public void flushPage(PageId pageid) {
+        //call write_page to write page to disk
+    }
+
     /**
      * Used to flush all dirty pages in the buffer pool to disk
-     *
      */
-    public void flushAllPages() {};
+    public void flushAllPages() {
+        //loop app pages in buffer and write dirty to disk
+        //QUESTION: Do we remove them from the buffer or just set to no longer dirty?
+    }
+
     /**
      * Returns the total number of buffer frames.
      */
-    public int getNumBuffers() {return 0;}
+    public int getNumBuffers() {
+        //return numBufs
+        return 0;
+    }
+
     /**
      * Returns the total number of unpinned buffer frames.
      */
-    public int getNumUnpinned() {return 0;}
+    public int getNumUnpinned() {
+        return 0;
+    }
 }
