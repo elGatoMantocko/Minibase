@@ -1,12 +1,14 @@
 package bufmgr;
 
 import global.Page;
+import global.PageId;
 
 /**
  * Created by david on 2/9/16.
  */
 public class Frame {
     protected boolean isDirty;
+    protected PageId pageid;
     protected Page page;
     protected int pinCount;
 
@@ -15,8 +17,9 @@ public class Frame {
         this.pinCount = 0;
     }
 
-    public Frame(Page page) {
+    public Frame(PageId id, Page page) {
         this();
+        this.pageid = id;
         this.page = page;
     }
 
@@ -47,4 +50,9 @@ public class Frame {
     public void setPage(Page page) {
         this.page = page;
     }
+
+    public PageId getPageId() {
+        return pageid;
+    }
 }
+
