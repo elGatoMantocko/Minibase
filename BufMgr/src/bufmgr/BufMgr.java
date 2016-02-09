@@ -9,7 +9,7 @@ import global.PageId;
  * Created by david on 2/3/16.
  */
 public class BufMgr {
-
+    Frame[] mBuffer;
     /**
      * Create the BufMgr object.
      * Allocate pages (frames) for the buffer pool in main memory and
@@ -23,6 +23,7 @@ public class BufMgr {
      */
     public BufMgr(int numbufs, int lookAheadSize, String replacementPolicy) {
         //Allocate an array of buffers with given size.
+        mBuffer = new Frame[numbufs];
         //save numbufs.
     }
 
@@ -133,7 +134,7 @@ public class BufMgr {
      */
     public int getNumBuffers() {
         //return numBufs
-        return 0;
+        return mBuffer.length;
     }
 
     /**
