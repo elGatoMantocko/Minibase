@@ -5,11 +5,14 @@ import global.Minibase;
 import global.Page;
 import global.PageId;
 
+import java.util.HashMap;
+
 /**
  * Created by david on 2/3/16.
  */
 public class BufMgr {
-    Frame[] mBuffer;
+    private final int mNumBufs;
+    HashMap<PageId, Frame> mBuffer;
     /**
      * Create the BufMgr object.
      * Allocate pages (frames) for the buffer pool in main memory and
@@ -23,7 +26,8 @@ public class BufMgr {
      */
     public BufMgr(int numbufs, int lookAheadSize, String replacementPolicy) {
         //Allocate an array of buffers with given size.
-        mBuffer = new Frame[numbufs];
+        mBuffer = new HashMap<PageId, Frame>(numbufs);
+        this.mNumBufs = numbufs;
         //save numbufs.
     }
 
@@ -69,6 +73,7 @@ public class BufMgr {
      * @param dirty  the dirty bit of the frame
      */
     public void unpinPage(PageId pageno, boolean dirty) throws ChainException /*, PageUnpinnedException*/ {
+
         //if pincount == 0
             //error
 
@@ -134,7 +139,7 @@ public class BufMgr {
      */
     public int getNumBuffers() {
         //return numBufs
-        return mBuffer.length;
+        return mNumBufs;
     }
 
     /**
