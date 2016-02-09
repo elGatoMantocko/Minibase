@@ -36,6 +36,9 @@ public class Frame {
     }
 
     public void unpin() {
+        if(getPinCount() == 0) {
+            throw new PageUnpinnedException();
+        }
         pinCount--;
     }
 

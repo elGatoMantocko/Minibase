@@ -13,6 +13,7 @@ import java.util.HashMap;
 public class BufMgr {
     private final int mNumBufs;
     HashMap<PageId, Frame> mBuffer;
+
     /**
      * Create the BufMgr object.
      * Allocate pages (frames) for the buffer pool in main memory and
@@ -73,14 +74,11 @@ public class BufMgr {
      * @param dirty  the dirty bit of the frame
      */
     public void unpinPage(PageId pageno, boolean dirty) throws ChainException /*, PageUnpinnedException*/ {
-
-        //if pincount == 0
-            //error
-
-        //set page the dirty
-        //if pincount > 0
-            //pincount--;
-
+        Frame frame = mBuffer.get(pageno);
+        frame.unpin(); //throws PageUnpinnedException if page is not pinned.
+        if(dirty) {
+            frame.markDirty();
+        }
     }
 
     /**
