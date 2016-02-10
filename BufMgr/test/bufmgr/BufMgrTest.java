@@ -1,5 +1,6 @@
 package bufmgr;
 
+import chainexception.ChainException;
 import global.Page;
 import global.PageId;
 import org.junit.Before;
@@ -36,14 +37,56 @@ public class BufMgrTest {
         frame.pin();
         bufMgr.unpinPage(pid, false);
         assertEquals("Pin count should be zero", 0, frame.getPinCount());
+    }
+
+    @Test
+    public void testUnpinTwicePinnedPage() throws Exception {
+        final int PID = 123;
+        PageId pid = new PageId(PID);
+        Frame frame = new Frame(pid, new Page());
+        bufMgr.mBuffer.put(pid, frame);
 
         frame.pin();
         frame.pin();
         bufMgr.unpinPage(pid, false);
         assertEquals("Pin count should be one", 1, frame.getPinCount());
+    }
 
+    @Test
+    public void testUnpinUnpinnedPage() throws Exception {
+        final int PID = 123;
+        PageId pid = new PageId(PID);
+        Frame frame = new Frame(pid, new Page());
+        bufMgr.mBuffer.put(pid, frame);
+
+        boolean isFailed = false;
+        try {
+            bufMgr.unpinPage(pid, false);
+        } catch(PageUnpinnedException e) {
+            isFailed = true;
+        }
+        assertTrue(isFailed);
+    }
+
+    @Test
+    public void testUnpinPageDirty() throws Exception {
+        final int PID = 123;
+        PageId pid = new PageId(PID);
+        Frame frame = new Frame(pid, new Page());
+        bufMgr.mBuffer.put(pid, frame);
+
+        frame.pin();
         bufMgr.unpinPage(pid, true);
         assertEquals("Page should be dirty", true, frame.isDirty());
+    }
+
+
+    @Test
+    public void testUnpinClean() throws Exception {
+        final int PID = 123;
+        PageId pid = new PageId(PID);
+        Frame frame = new Frame(pid, new Page());
+        bufMgr.mBuffer.put(pid, frame);
 
         frame.pin();
         bufMgr.unpinPage(pid, false);
