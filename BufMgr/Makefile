@@ -7,12 +7,9 @@ BINPATH = $(JDKPATH)/bin
 JAVAC = $(JDKPATH)/bin/javac 
 JAVA  = $(JDKPATH)/bin/java 
 
-TEST_PACKAGE=tests.
-TEST_DIR=./test/tests
-TEST_NAMES=BMDriverTest
-TEST_FILES=$(TEST_NAMES:=.java)
-TEST_SOURCES=$(addprefix $(TEST_DIR)/, $(TEST_FILES))
-TEST_CLASSES=$(TEST_SOURCES:.java=.class)
+TEST_DIR=./test
+TEST_NAMES=BMDriverTest BufMgrTest FrameTest
+TEST_SOURCES=./test/tests/BMDriverTest.java ./test/bufmgr/BufMgrTest.java ./test/bufmgr/FrameTest.java
 
 PROGS = xx
 
@@ -22,14 +19,14 @@ compile:src/*/*.java
 	@mkdir -p ./bin
 	$(JAVAC) -cp $(CLASSPATH) -d bin src/*/*.java
 
-test: $(TEST_CLASSES)
-	$(JAVA) -cp $(CLASSPATH):bin:bin/tests org.junit.runner.JUnitCore $(TEST_PACKAGE)$(TEST_NAMES)
+test: compile_tests
+	$(JAVA) -cp $(CLASSPATH):bin:bin/tests:bin/bufmgr org.junit.runner.JUnitCore bufmgr.BufMgrTest bufmgr.FrameTest tests.BMDriverTest
 
 xx : compile
 	$(JAVA) -cp $(CLASSPATH):bin tests.BMTest
 
-$(TEST_CLASSES): compile $(TEST_SOURCES)
-	$(JAVAC) -cp $(CLASSPATH):bin -d bin $(TEST_SOURCES)
+compile_tests: compile
+	$(JAVAC) -cp $(CLASSPATH):bin -d bin ./test/tests/BMDriverTest.java ./test/bufmgr/BufMgrTest.java ./test/bufmgr/FrameTest.java
 
 clean:
 	rm -rf ./bin
