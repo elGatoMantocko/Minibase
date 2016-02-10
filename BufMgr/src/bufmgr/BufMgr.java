@@ -11,6 +11,7 @@ import global.PageId;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -185,6 +186,15 @@ public class BufMgr {
     public void flushAllPages() {
         //loop app pages in buffer and write dirty to disk
         //QUESTION: Do we remove them from the buffer or just set to no longer dirty?
+        for(Map.Entry<PageId, Frame> entry : mBuffer.entrySet()) {
+            if(entry.getValue().isDirty()) {
+                try {
+                    flushPage(entry.getKey());
+                } catch (InvalidPageNumberException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     /**
