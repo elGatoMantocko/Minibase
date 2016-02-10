@@ -1,10 +1,12 @@
 package bufmgr;
 
 import chainexception.ChainException;
+import diskmgr.DiskMgr;
 import global.Minibase;
 import global.Page;
 import global.PageId;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -50,11 +52,23 @@ public class BufMgr {
      * @param page      the pointer point to the page.
      * @param emptyPage true (empty page); false (non-empty page)
      */
-    public void pinPage(PageId pageno, Page page, boolean emptyPage) throws ChainException {
+    public void pinPage(PageId pageno, Page page, boolean emptyPage /*assume false*/) throws ChainException {
         //check if already exists in pool.
-        //if true, increment pincount
-        //if false
-        //Load page into replacement candidate. (while writing old page if dirty).
+        if(!mBuffer.containsKey(pageno)) {
+            //Is not loaded in memory.
+
+            //Load page into replacement candidate. (while writing old page if dirty).
+            try {
+                Minibase.DiskManager.read_page(pageno, page);
+                //if mBuffer.size == getNumFrames()
+                    //clearFrames(1) //throws IllegalStateException if all pinned.
+                mBuffer.put(pageno, new Frame(pageno, page)); //TODO: Need to limit the frames.
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        mBuffer.get(pageno).pin();
     }
 
     /**
@@ -98,7 +112,6 @@ public class BufMgr {
         //allocate page in diskManager.
         //Load first page into memory
         //pin it.
-
         return null;
     }
 
