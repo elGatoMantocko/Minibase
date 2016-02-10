@@ -109,7 +109,21 @@ public class BufMgr {
      * @return the first page id of the new pages.__ null, if error.
      */
     public PageId newPage(Page firstpage, int howmany) {
+        //if mBuffer.size == getNumFrames()
+            //clearFrames(1) //throws IllegalStateException if all pinned.
+            //catch Exception
+                //return null
+
         //allocate page in diskManager.
+        try {
+            PageId pageId = Minibase.DiskManager.allocate_page(howmany);
+            pinPage(pageId, firstpage, false);
+            return pageId;
+        } catch (ChainException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         //Load first page into memory
         //pin it.
         return null;
