@@ -23,7 +23,7 @@ test: compile_tests
 	$(JAVA) -cp $(CLASSPATH):bin:bin/tests:bin/heap org.junit.runner.JUnitCore heap.HeapFileTest tests.HFDriverTest
 
 xx : compile
-	$(JAVA) -cp $(CLASSPATH):bin tests.BMTest
+	$(JAVA) -cp $(CLASSPATH):bin tests.HFTest
 
 compile_tests: compile
 	$(JAVAC) -cp $(CLASSPATH):bin -d bin ./test/tests/HFDriverTest.java ./test/heap/HeapFileTest.java
