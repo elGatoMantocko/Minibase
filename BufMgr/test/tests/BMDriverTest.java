@@ -3,9 +3,8 @@ package tests;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import tests.BMDriver;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by david on 2/3/16.

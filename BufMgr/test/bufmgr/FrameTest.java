@@ -5,15 +5,12 @@ import global.PageId;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.AllTests;
 
 import static org.junit.Assert.*;
 
 /**
  * Created by david on 2/9/16.
  */
-@RunWith(AllTests.class)
 public class FrameTest {
 
     public static final int PID = 123;

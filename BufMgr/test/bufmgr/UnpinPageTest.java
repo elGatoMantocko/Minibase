@@ -5,7 +5,7 @@ import global.PageId;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by david on 2/10/16.

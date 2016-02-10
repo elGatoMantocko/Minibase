@@ -1,7 +1,6 @@
 package bufmgr;
 
 import org.junit.Before;
-import static org.junit.Assert.*;
 
 
 /**

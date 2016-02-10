@@ -1,14 +1,9 @@
 package tests;
 
-import global.Convert;
-import global.GlobalConst;
-import global.Minibase;
-import global.Page;
-import global.PageId;
+import chainexception.ChainException;
+import global.*;
 
 import java.io.IOException;
-
-import chainexception.ChainException;
 
 //Note that in JAVA, methods can't be overridden to be more private.
 //Therefore, the declaration of all private functions are now declared

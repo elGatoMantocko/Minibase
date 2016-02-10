@@ -2,17 +2,12 @@
 
 package diskmgr;
 
-import global.Convert;
-import global.GlobalConst;
-import global.Minibase;
-import global.Page;
-import global.PageId;
+import chainexception.ChainException;
+import global.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-import chainexception.ChainException;
 
 public class DiskMgr implements GlobalConst {
 
