@@ -1,6 +1,5 @@
 JDKPATH = /usr
 LIBPATH = lib/bufmgrAssign.jar
-JUNITPATH = /usr/share/java/junit4.jar
 
 CLASSPATH = .:..:$(LIBPATH):$(JUNITPATH)
 BINPATH = $(JDKPATH)/bin
@@ -8,8 +7,8 @@ JAVAC = $(JDKPATH)/bin/javac
 JAVA  = $(JDKPATH)/bin/java 
 
 TEST_DIR=./test
-TEST_NAMES=BMDriverTest BufMgrTest FrameTest
-TEST_SOURCES=./test/tests/BMDriverTest.java ./test/bufmgr/BufMgrTest.java ./test/bufmgr/FrameTest.java
+TEST_NAMES=tests.BMDriverTest bufmgr.BufMgrTest bufmgr.FrameTest
+TEST_SOURCES=./test/tests/*.java ./test/bufmgr/*.java
 
 PROGS = xx
 
@@ -20,13 +19,13 @@ compile:src/*/*.java
 	$(JAVAC) -cp $(CLASSPATH) -d bin src/*/*.java
 
 test: compile_tests
-	$(JAVA) -cp $(CLASSPATH):bin:bin/tests:bin/bufmgr org.junit.runner.JUnitCore bufmgr.BufMgrTest bufmgr.FrameTest tests.BMDriverTest
+	$(JAVA) -cp $(CLASSPATH):bin:bin/tests:bin/bufmgr org.junit.runner.JUnitCore $(TEST_NAMES)
 
 xx : compile
 	$(JAVA) -cp $(CLASSPATH):bin tests.BMTest
 
 compile_tests: compile
-	$(JAVAC) -cp $(CLASSPATH):bin -d bin ./test/tests/BMDriverTest.java ./test/bufmgr/BufMgrTest.java ./test/bufmgr/FrameTest.java
+	$(JAVAC) -cp $(CLASSPATH):bin -d bin $(TEST_SOURCES)
 
 clean:
 	rm -rf ./bin
