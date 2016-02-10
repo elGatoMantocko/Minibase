@@ -21,11 +21,6 @@ public class UnpinPageTest extends BufMgrTest {
         mFrame = new Frame(mPageId, new Page());
         mBufManager.mBuffer.put(mPageId, mFrame);
     }
-    
-    @Test
-    public void testGetNumBuffers() throws Exception {
-        assertEquals("", NUM_BUFFERS, mBufManager.getNumBuffers());
-    }
 
     @Test
     public void testUnpinPage() throws Exception {
