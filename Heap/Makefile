@@ -1,6 +1,5 @@
 JDKPATH = /usr
 LIBPATH = lib/heapAssign.jar
-JUNITPATH = /usr/share/java/junit4.jar
 
 CLASSPATH = .:..:$(LIBPATH):$(JUNITPATH)
 BINPATH = $(JDKPATH)/bin
@@ -8,7 +7,7 @@ JAVAC = $(JDKPATH)/bin/javac
 JAVA  = $(JDKPATH)/bin/java 
 
 TEST_DIR=./test
-TEST_NAMES=DriverTest HeapFileTest
+TEST_NAMES=tests.HFDriverTest heap.HeapFileTest
 TEST_SOURCES=./test/tests/HFDriverTest.java ./test/heap/HeapFileTest.java
 
 PROGS = xx
@@ -20,13 +19,13 @@ compile:src/*/*.java
 	$(JAVAC) -cp $(CLASSPATH) -d bin src/*/*.java
 
 test: compile_tests
-	$(JAVA) -cp $(CLASSPATH):bin:bin/tests:bin/heap org.junit.runner.JUnitCore heap.HeapFileTest tests.HFDriverTest
+	$(JAVA) -cp $(CLASSPATH):bin:bin/tests:bin/heap org.junit.runner.JUnitCore $(TEST_NAMES)
 
 xx : compile
 	$(JAVA) -cp $(CLASSPATH):bin tests.HFTest
 
 compile_tests: compile
-	$(JAVAC) -cp $(CLASSPATH):bin -d bin ./test/tests/HFDriverTest.java ./test/heap/HeapFileTest.java
+	$(JAVAC) -cp $(CLASSPATH):bin -d bin $(TEST_SOURCES)
 
 clean:
 	rm -rf ./bin
