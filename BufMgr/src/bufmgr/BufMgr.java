@@ -116,6 +116,8 @@ public class BufMgr {
 
         //allocate page in diskManager.
         try {
+            //Load first page into memory
+            //pin it.
             PageId pageId = Minibase.DiskManager.allocate_page(howmany);
             pinPage(pageId, firstpage, false);
             return pageId;
@@ -124,8 +126,6 @@ public class BufMgr {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Load first page into memory
-        //pin it.
         return null;
     }
 
