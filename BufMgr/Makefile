@@ -11,7 +11,8 @@ TEST_NAMES=\
 tests.BMDriverTest \
 bufmgr.BufMgrTest \
 bufmgr.FrameTest \
-bufmgr.UnpinPageTest
+bufmgr.UnpinPageTest \
+bufmgr.NewPageTest
 
 TEST_SOURCES=\
 ./test/tests/*.java \
