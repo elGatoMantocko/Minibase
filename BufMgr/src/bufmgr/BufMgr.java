@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class BufMgr {
     private final int mNumBufs;
-    HashMap<PageId, Frame> mBuffer;
+    Map<PageId, Frame> mBuffer;
 
     /**
      * Create the BufMgr object.
