@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 /**
  * Created by david on 2/9/16.
  */
-public class HeapTest {
+public class HeapFileTest {
 
     HeapFile heap;
 

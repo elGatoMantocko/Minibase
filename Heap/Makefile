@@ -8,8 +8,8 @@ JAVAC = $(JDKPATH)/bin/javac
 JAVA  = $(JDKPATH)/bin/java 
 
 TEST_DIR=./test
-TEST_NAMES=DriverTest HeapTest
-TEST_SOURCES=./test/tests/HFDriverTest.java ./test/heap/HeapTest.java
+TEST_NAMES=DriverTest HeapFileTest
+TEST_SOURCES=./test/tests/HFDriverTest.java ./test/heap/HeapFileTest.java
 
 PROGS = xx
 
@@ -20,13 +20,13 @@ compile:src/*/*.java
 	$(JAVAC) -cp $(CLASSPATH) -d bin src/*/*.java
 
 test: compile_tests
-	$(JAVA) -cp $(CLASSPATH):bin:bin/tests:bin/heap org.junit.runner.JUnitCore heap.HeapTest tests.HFDriverTest
+	$(JAVA) -cp $(CLASSPATH):bin:bin/tests:bin/heap org.junit.runner.JUnitCore heap.HeapFileTest tests.HFDriverTest
 
 xx : compile
 	$(JAVA) -cp $(CLASSPATH):bin tests.BMTest
 
 compile_tests: compile
-	$(JAVAC) -cp $(CLASSPATH):bin -d bin ./test/tests/HFDriverTest.java ./test/heap/HeapTest.java
+	$(JAVAC) -cp $(CLASSPATH):bin -d bin ./test/tests/HFDriverTest.java ./test/heap/HeapFileTest.java
 
 clean:
 	rm -rf ./bin
