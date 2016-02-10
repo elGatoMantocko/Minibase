@@ -3,12 +3,15 @@ package bufmgr;
 import chainexception.ChainException;
 import com.sun.net.httpserver.Filter;
 import diskmgr.DiskMgr;
+import diskmgr.FileIOException;
+import diskmgr.InvalidPageNumberException;
 import global.Minibase;
 import global.Page;
 import global.PageId;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by david on 2/3/16.
@@ -155,8 +158,25 @@ public class BufMgr {
      *
      * @param pageid the page number in the database.
      */
-    public void flushPage(PageId pageid) {
+    public void flushPage(PageId pageid) throws InvalidPageNumberException {
         //call write_page to write page to disk
+        if(mBuffer.containsKey(pageid)) {
+            Frame frame = mBuffer.get(pageid);
+            if(frame.isPinned()) {
+                throw new RuntimeException(); // Cannot flush a pinned page!
+            }
+            if(frame.isDirty()) {
+                try {
+                    Minibase.DiskManager.write_page(pageid, frame.getPage());
+                } catch (FileIOException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                mBuffer.remove(pageid);
+            }
+        }
     }
 
     /**
