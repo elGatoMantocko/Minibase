@@ -52,20 +52,14 @@ public class BufMgrTest {
         assertEquals("Pin count should be one", 1, frame.getPinCount());
     }
 
-    @Test
+    @Test(expected=PageUnpinnedException.class)
     public void testUnpinUnpinnedPage() throws Exception {
         final int PID = 123;
         PageId pid = new PageId(PID);
         Frame frame = new Frame(pid, new Page());
         bufMgr.mBuffer.put(pid, frame);
 
-        boolean isFailed = false;
-        try {
-            bufMgr.unpinPage(pid, false);
-        } catch(PageUnpinnedException e) {
-            isFailed = true;
-        }
-        assertTrue(isFailed);
+        bufMgr.unpinPage(pid, false);
     }
 
     @Test

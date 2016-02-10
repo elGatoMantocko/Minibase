@@ -45,19 +45,13 @@ public class FrameTest {
         assertEquals("Pinning should increase the count to one", 1, mFrame.pinCount);
     }
 
-    @Test
+    @Test(expected=PageUnpinnedException.class)
     public void testUnpin() throws Exception {
         mFrame.pin();
         mFrame.unpin();
         assertEquals("This page should no longer be pinned", 0, mFrame.pinCount);
 
-        boolean threwException = false;
-        try {
-            mFrame.unpin();
-        } catch(PageUnpinnedException pue) {
-            threwException = true;
-        }
-        assertTrue("Unpinning an already unpinned page should throw an exception", threwException);
+        mFrame.unpin();
     }
 
     @Test
