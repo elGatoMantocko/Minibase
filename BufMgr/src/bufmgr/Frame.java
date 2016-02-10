@@ -57,5 +57,9 @@ public class Frame {
     public PageId getPageId() {
         return pageid;
     }
+
+    public boolean isPinned() {
+        return pinCount > 0;
+    }
 }
 

@@ -1,6 +1,7 @@
 package bufmgr;
 
 import chainexception.ChainException;
+import com.sun.net.httpserver.Filter;
 import diskmgr.DiskMgr;
 import global.Minibase;
 import global.Page;
@@ -139,6 +140,13 @@ public class BufMgr {
     public void freePage(PageId globalPageId) throws ChainException {
         //QUESTION: Should this check/clear the buffer? Should it respect pinned status?
         //run diskmgr.deallocate*
+        if(mBuffer.containsKey(globalPageId)) {
+            if(mBuffer.get(globalPageId).isPinned()) {
+                throw new ChainException();
+            }
+            mBuffer.remove(globalPageId);
+        }
+        Minibase.DiskManager.deallocate_page(globalPageId);
     }
 
     /**
