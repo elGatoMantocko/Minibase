@@ -11,17 +11,17 @@ import static org.junit.Assert.*;
 /**
  * Created by david on 2/9/16.
  */
-public class HeapFileTest {
+public class TupleTest {
 
-  HeapFile heap;
+  Tuple tuple;
 
-  @Before @Ignore
+  @Before 
   public void setUp() throws Exception {
 
   }
 
-  @Test @Ignore
-  public void sometest() throws Exception {
+  @Test
+  public void testTuple() throws Exception {
 
   }
 }
