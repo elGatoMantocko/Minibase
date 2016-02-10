@@ -7,8 +7,15 @@ JAVAC = $(JDKPATH)/bin/javac
 JAVA  = $(JDKPATH)/bin/java 
 
 TEST_DIR=./test
-TEST_NAMES=tests.BMDriverTest bufmgr.BufMgrTest bufmgr.FrameTest
-TEST_SOURCES=./test/tests/*.java ./test/bufmgr/*.java
+TEST_NAMES=\
+tests.BMDriverTest \
+bufmgr.BufMgrTest \
+bufmgr.FrameTest \
+bufmgr.UnpinPageTest
+
+TEST_SOURCES=\
+./test/tests/*.java \
+./test/bufmgr/*.java
 
 PROGS = xx
 
