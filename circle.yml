@@ -3,11 +3,19 @@ machine:
     version: oraclejdk8
 
 dependencies:
-  pre:
-    - sudo apt-get update; sudo apt-get install junit4
+  cache_directories:
+    - ~/.junit
+
+  override:
+    # install
+    - if [ ! -e ~/.junit ]; then wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o ~/.junit/junit-4.12.jar
 
 test:
   override:
     - cd BufMgr; make test
+      environment:
+        JUNITPATH: ~/.junit/junit-4.12.jar
     - cd Heap; make test
+      environment:
+        JUNITPATH: ~/.junit/junit-4.12.jar
 
