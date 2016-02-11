@@ -16,6 +16,15 @@ public class BMDriverTest {
         mDriver = new BMDriver();
     }
 
+    /**
+     * The driver needs to init things in runTests, so it needs to be
+     * run like this, unfortunately.
+     */
+    @Test
+    public void testRunTests() {
+        assertTrue(mDriver.runTests());
+    }
+
     @Test @Ignore
     public void testTest1() throws Exception {
         assertTrue("Test 1 had an error", mDriver.test1());
