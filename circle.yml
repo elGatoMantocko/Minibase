@@ -13,9 +13,9 @@ dependencies:
 test:
   override:
     - cd BufMgr; make test
-      environment:
-        JUNITPATH: ~/.junit/junit-4.12.jar
+        environment:
+          JUNITPATH: ~/.junit/junit-4.12.jar
     - cd Heap; make test
-      environment:
-        JUNITPATH: ~/.junit/junit-4.12.jar
+        environment:
+          JUNITPATH: ~/.junit/junit-4.12.jar
 
