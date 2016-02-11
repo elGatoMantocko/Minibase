@@ -17,40 +17,45 @@ public class HeapFile implements GlobalConst {
   String fileName;
 
   public HeapFile(String name) {
-
     this.fileName = name;
 
     boolean exists = true;
     PageId firstid;
+
     if (name != null) {
-      if (Minibase.DiskManager.get_file_entry(name) == null) {
-        Page p = new Page();
+      Page p = new Page();
+      firstid = Minibase.DiskManager.get_file_entry(name);
+      if (firstid == null) {
+        firstid = Minibase.BufferManager.newPage(p, 1);
+      }
+      else {
+        Minibase.BufferManager.pinPage(firstid, p, false);
       }
     }
   }
 
   public RID insertRecord(byte[] record) throws ChainException {
-      return null;
+    return null;
   }
 
   public Tuple getRecord(RID rid) {
-      return null;
+    return null;
   }
 
   public boolean updateRecord(RID rid, Tuple newRecord) throws ChainException {
-      return false;
+    return false;
   }
 
   public boolean deleteRecord(RID rid) {
-      return false;
+    return false;
   }
 
   //get number of records in the file
   public int getRecCnt() {
-      return 0;
+    return 0;
   }
 
   public HeapScan openScan() {
-      return null;
+    return null;
   }
 }

@@ -29,37 +29,40 @@ public class HeapFileTest {
 
   private int choice;
   private final static int reclen = 32;
-  HeapFile heap;
+
+  HeapFile f;
+  RID rid;
 
   @Before
   public void setUp() throws Exception {
+    boolean status = OK;
+    RID rid = new RID();
+    f = null;
 
+    new Minibase("test.minibase", 1000, 10, 0, "LFU", false);
   }
 
   @Test
-  public void sometest() throws Exception {
-
-    System.out.println ("\n  Test 1: Insert and scan fixed-size records\n");
-    boolean status = OK;
-    RID rid = new RID();
-    HeapFile f = null;
-
-    System.out.println ("  - Create a heap file\n");
+  public void testNewHeapFile() {
     try {
       f = new HeapFile("file_1");
     }
     catch (Exception e) {
-      status = FAIL;
-      System.err.println ("*** Could not create heap file\n");
-      e.printStackTrace();
+      fail("Could not create heap file");
     }
+  }
 
-    if ( status == OK && Minibase.BufferManager.getNumUnpinned()
-            != Minibase.BufferManager.getNumBuffers() ) {
-      System.err.println ("*** The heap file has left pages pinned\n");
-      status = FAIL;
-    }
+  @Test
+  public void testAllPagesUnpinned() {
+    assertNotSame("The heap file has left pages pinned", 
+        Minibase.BufferManager.getNumUnpinned(), 
+        Minibase.BufferManager.getNumBuffers());
+  }
 
+  @Test @Ignore
+  public void sometest() throws Exception {
+
+    /*
     if ( status == OK ) {
       System.out.println ("  - Add " + choice + " records to the file\n");
       for (int i =0; (i < choice) && (status == OK); i++) {
@@ -211,7 +214,9 @@ public class HeapFileTest {
 
     assertEquals("  Test 1 completed successfully.\n", status, OK);
 
+    */
   }
+
 }
 
 // This is added to substitute the struct construct in C++
