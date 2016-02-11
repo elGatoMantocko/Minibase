@@ -2,14 +2,6 @@ machine:
   java:
     version: oraclejdk8
 
-dependencies:
-  cache_directories:
-    - ~/.junit
-
-  override:
-    # install
-    - if [ ! -e ~/.junit ]; then mkdir ~/.junit; wget http://search.maven.org/remotecontent\?filepath\=junit/junit/4.12/junit-4.12.jar -O ~/.junit/junit-4.12.jar; fi
-
 test:
   override:
     - cd BufMgr; make test
