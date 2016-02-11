@@ -11,45 +11,35 @@ import static org.junit.Assert.*;
  * Created by david on 2/10/16.
  */
 public class NewPageTest extends BufMgrTest {
-    final int PID = 123;
-    Frame mFrame;
     PageId mPageId;
+    Page mPage;
 
     @Before
     public void setup() {
-
+        mPage = new Page();
     }
 
     @Test
     public void testNewPage() {
-        Page page = new Page();
-        PageId pid;
-        pid = mBufManager.newPage(page, 1);
-        assertNotNull(pid);
+        mPageId = mBufManager.newPage(mPage, 1);
+        assertNotNull(mPageId);
     }
 
     @Test
     public void testShouldReturnPageId() {
-        Page page = new Page();
-        PageId pid;
-        pid = mBufManager.newPage(page, 1);
-        assertNotNull(pid);
+        mPageId = mBufManager.newPage(mPage, 1);
+        assertNotNull(mPageId);
     }
 
     @Test
     public void testShouldBufferPage() {
-        Page page = new Page();
-        PageId pid;
-        pid = mBufManager.newPage(page, 1);
-        assertTrue(mBufManager.mBuffer.containsKey(pid));
-        assertArrayEquals(page.getData(), mBufManager.mBuffer.get(pid).getPage().getData());
+        mPageId = mBufManager.newPage(mPage, 1);
+        assertTrue(mBufManager.mBuffer.containsKey(mPageId));
     }
 
     @Test
     public void testShouldPinPage() {
-        Page page = new Page();
-        PageId pid;
-        pid = mBufManager.newPage(page, 1);
-        assertTrue(mBufManager.mBuffer.get(pid).isPinned());
+        mPageId = mBufManager.newPage(mPage, 1);
+        assertTrue(mBufManager.mBuffer.get(mPageId).isPinned());
     }
 }
