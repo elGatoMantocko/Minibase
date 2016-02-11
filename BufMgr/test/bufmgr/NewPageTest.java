@@ -25,6 +25,7 @@ public class NewPageTest extends BufMgrTest {
         Page page = new Page();
         PageId pid;
         pid = mBufManager.newPage(page, 1);
+        assertNotNull(pid);
     }
 
     @Test
@@ -41,7 +42,7 @@ public class NewPageTest extends BufMgrTest {
         PageId pid;
         pid = mBufManager.newPage(page, 1);
         assertTrue(mBufManager.mBuffer.containsKey(pid));
-        assertEquals(page, mBufManager.mBuffer.get(pid).getPage());
+        assertArrayEquals(page.getData(), mBufManager.mBuffer.get(pid).getPage().getData());
     }
 
     @Test

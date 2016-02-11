@@ -1,5 +1,6 @@
 package bufmgr;
 
+import global.Minibase;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +18,8 @@ public class BufMgrTest {
 
     @Before
     public void setUp() throws Exception {
-        mBufManager = new BufMgr(NUM_BUFFERS, 0, "");
+        new Minibase("test_db", 100, NUM_BUFFERS, 0, "", false);
+        mBufManager = Minibase.BufferManager;
     }
 
     @Test
