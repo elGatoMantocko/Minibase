@@ -1,19 +1,24 @@
 package heap;
 
 import global.Page;
+import global.GlobalConst;
 import global.PageId;
 import global.RID;
 
 /**
  * Created by david on 2/5/16.
  */
-public class HFPage extends Page {
+public class HFPage extends Page implements GlobalConst {
+
+  private Page page;
+  private PageId pid;
 
   public HFPage(long baseAddress, long unmappedPageLength) {
+    page = new Page();
   }
 
   public HFPage(Page page) {
-
+    this.page = page;
   }
 
   //Deletes a record from the page, compacting the records space.
