@@ -69,3 +69,6 @@ fabric.properties
 
 # ignore local vimrc files
 .vimrc
+
+# ignore db files
+*.minibase
