@@ -7,7 +7,6 @@ import global.Minibase;
 import global.Page;
 import global.PageId;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -54,7 +53,7 @@ public class PinPageTest extends BufMgrTest {
      * But it is a problem with the Minibase, not the code.
      * @throws ChainException
      */
-    @Test @Ignore//(expected = ChainException.class)
+    @Test //@Ignore//(expected = ChainException.class)
     public void pinNonExistentPage() throws ChainException {
         Page p = new Page();
         Minibase.BufferManager.pinPage(new PageId(mPageId.pid + 1), p, false);

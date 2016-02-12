@@ -73,8 +73,8 @@ public class FrameTest {
         assertSame("New page should be in the frame", page, mFrame.page);
     }
 
-    @Test @Ignore
+    @Test
     public void testGetPageId() throws Exception {
-
+        assertEquals(mFrame.getPageId(), mPageId);
     }
 }
