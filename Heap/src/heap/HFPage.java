@@ -77,17 +77,19 @@ public class HFPage extends Page implements GlobalConst {
     short slotlength;
 
     int i;
-    // find the first slot that has a record
     for (i = 0; i < slotcount; i++) {
       slotlength = getSlotLength(i);
+      // find the first slot that has a record
       if (slotlength != -1) {
         break;
       }
     }
 
-    if (i == slotcount) {
+    // if slotcount is 0 then there is no record on the page
+    if (i == slotcount) { 
       return null;
     }
+    // return the rid of the current page id with the found slot number
     else {
       return new RID(new PageId(getIntValue(16)), i);
     }
