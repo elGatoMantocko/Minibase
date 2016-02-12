@@ -39,32 +39,32 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Gets the current page's id.
   public PageId getCurPage() {
-    return new PageId(getIntValue(16));
+    return new PageId(getIntValue(CUR_PAGE));
   }
 
   //    Sets the current page's id.
   public void setCurPage(PageId pageno) {
-    setIntValue(pageno.pid, 16);
+    setIntValue(pageno.pid, CUR_PAGE);
   }
 
   //    Gets the next page's id.
   public PageId getNextPage() {
-    return new PageId(getIntValue(12));
+    return new PageId(getIntValue(NEXT_PAGE));
   }
 
   //    Sets the next page's id.
   public void setNextPage(PageId pageno) {
-    setIntValue(pageno.pid, 12);
+    setIntValue(pageno.pid, NEXT_PAGE);
   }
 
   //    Gets the previous page's id.
   public PageId getPrevPage() {
-    return new PageId(getIntValue(16));
+    return new PageId(getIntValue(PREV_PAGE));
   }
 
   //    Sets the previous page's id.
   public void setPrevPage(PageId pageno) {
-    setIntValue(pageno.pid, 16);
+    setIntValue(pageno.pid, PREV_PAGE);
   }
 
   //Deletes a record from the page, compacting the records space.
@@ -92,13 +92,13 @@ public class HFPage extends Page implements GlobalConst {
     }
     // return the rid of the current page id with the found slot number
     else {
-      return new RID(new PageId(getIntValue(16)), i);
+      return new RID(new PageId(getIntValue(CUR_PAGE)), i);
     }
   }
 
   //    Gets the amount of free space (in bytes).
   public short getFreeSpace() {
-    return getShortValue(4);
+    return getShortValue(FREE_SPACE);
   }
 
   //    Gets the number of slots on the page.
@@ -108,7 +108,7 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Gets the length of the record referenced by the given slot.
   public short getSlotLength(int slotno) {
-    return getShortValue(20 + 4 * slotno);
+    return getShortValue(20 + SLOT_SIZE * slotno);
   }
 
   //    Gets the offset of the record referenced by the given slot.
