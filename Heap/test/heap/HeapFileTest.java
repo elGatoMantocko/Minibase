@@ -42,7 +42,7 @@ public class HeapFileTest {
     new Minibase("test.minibase", 1000, 10, 0, "LFU", false);
   }
 
-  @Test
+  @Test @Ignore
   public void testNewHeapFile() {
     try {
       f = new HeapFile("file_1");
@@ -52,7 +52,7 @@ public class HeapFileTest {
     }
   }
 
-  @Test
+  @Test @Ignore
   public void testAllPagesUnpinned() {
     assertNotSame("The heap file has left pages pinned", 
         Minibase.BufferManager.getNumUnpinned(), 
