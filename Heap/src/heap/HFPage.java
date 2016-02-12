@@ -134,6 +134,24 @@ public class HFPage extends Page implements GlobalConst {
   //    Prints the contents of a heap file page.
   public void print() {
 
+    int slotcnt = getShortValue(SLOT_COUNT);
+
+    System.out.println("Header Data");
+    System.out.println("-----------");
+
+    System.out.println("slotcnt = " + slotcnt);
+    System.out.println("usedptr = " + getShortValue(USED_POINTER));
+    System.out.println("freespc = " + getShortValue(FREE_SPACE));
+    System.out.println("prevpag = " + getIntValue(PREV_PAGE));
+    System.out.println("nextpag = " + getIntValue(NEXT_PAGE));
+    System.out.println("curpage = " + getIntValue(CUR_PAGE));
+
+    System.out.println("\nRecords");
+    System.out.println("-----------");
+    int i = 0;
+    for (int x = 0; i < slotcnt; x+=4) {
+      System.out.println("slotnum = " + i + "\n\toffset = " + getShortValue(x) + " : length = " + getShortValue(x + 2));
+    }
   }
 
   //    Selects a record from the page.
