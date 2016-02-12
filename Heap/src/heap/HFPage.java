@@ -137,7 +137,10 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Selects a record from the page.
   public Tuple selectRecord(RID rid) {
-    return null;
+    short l = rid.getLength();
+    byte r[] = new byte[l];
+    System.arraycopy(data, getSlotOffset(rid.slotno), r, 0, l);
+    return new Tuple(new byte[l], 0, l);
   }
 
   //    Updates a record on the page.
