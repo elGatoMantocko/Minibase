@@ -10,15 +10,60 @@ import global.RID;
  */
 public class HFPage extends Page implements GlobalConst {
 
-  private Page page;
-  private PageId pid;
+  // there should be a collection of <PID, SlotNum> RIDs here
 
-  public HFPage(long baseAddress, long unmappedPageLength) {
-    page = new Page();
+  public HFPage() {
+    // slot count
+    setShortValue((short)0, 0);
+
+    // last used pointer to a record
+    setShortValue((short)PAGE_SIZE, 2);
+
+    // free space
+    setShortValue((short)1004, 4);
+
+    // prev page
+    setIntValue(-1, 8);
+    
+    // next page
+    setIntValue(-1, 12);
+    
+    // curr page
+    setIntValue(-1, 16);
   }
 
   public HFPage(Page page) {
-    this.page = page;
+    super(page.getData());
+  }
+
+  //    Gets the current page's id.
+  public PageId getCurPage() {
+      return new PageId(getIntValue(16));
+  }
+
+  //    Sets the current page's id.
+  public void setCurPage(PageId pageno) {
+    setIntValue(pageno.pid, 16);
+  }
+
+  //    Gets the next page's id.
+  public PageId getNextPage() {
+      return new PageId(getIntValue(12));
+  }
+
+  //    Sets the next page's id.
+  public void setNextPage(PageId pageno) {
+    setIntValue(pageno.pid, 12);
+  }
+
+  //    Gets the previous page's id.
+  public PageId getPrevPage() {
+      return new PageId(getIntValue(16));
+  }
+
+  //    Sets the previous page's id.
+  public void setPrevPage(PageId pageno) {
+    setIntValue(pageno.pid, 16);
   }
 
   //Deletes a record from the page, compacting the records space.
@@ -31,69 +76,39 @@ public class HFPage extends Page implements GlobalConst {
       return null;
   }
 
-  //    Gets the current page's id.
-  public PageId getCurPage() {
-      return null;
-  }
-
-  //    Sets the current page's id.
-  public void setCurPage(PageId pageno) {
-
-  }
-
   //    Gets the amount of free space (in bytes).
   public short getFreeSpace() {
-      return 0;
-  }
-
-  //    Gets the next page's id.
-  public PageId getNextPage() {
-      return null;
-  }
-
-  //    Sets the next page's id.
-  public void setNextPage(PageId pageno) {
-
-  }
-
-  //    Gets the previous page's id.
-  public PageId getPrevPage() {
-      return null;
-  }
-
-  //    Sets the previous page's id.
-  public void setPrevPage(PageId pageno) {
-
+      return getShortValue(4);
   }
 
   //    Gets the number of slots on the page.
   public short getSlotCount() {
-      return 0;
+    return getShortValue(0);
   }
 
   //    Gets the length of the record referenced by the given slot.
   public short getSlotLength(int slotno) {
-      return 0;
+    return 0;
   }
 
   //    Gets the offset of the record referenced by the given slot.
   public short getSlotOffset(int slotno) {
-      return 0;
+    return 0;
   }
 
   //    Returns true if the iteration has more elements.
   public boolean hasNext(RID curRid) {
-      return true;
+    return true;
   }
 
   //    Inserts a new record into the page.
   public RID insertRecord(byte[] record) {
-      return null;
+    return null;
   }
 
   //    Gets the next RID after the given one, or null if no more.
   public RID nextRecord(RID curRid) {
-      return null;
+    return null;
   }
 
   //    Prints the contents of a heap file page.
@@ -103,7 +118,7 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Selects a record from the page.
   public Tuple selectRecord(RID rid) {
-      return null;
+    return null;
   }
 
   //    Updates a record on the page.
