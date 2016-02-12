@@ -21,7 +21,7 @@ public class HFPageTest implements GlobalConst {
   private HFPage hf;
 
   @Before
-  public void setUp() throws Exception {
+  public void createDatabase() throws Exception {
     hf = new HFPage();
 
     new Minibase("test.minibase", 1000, 10, 0, "LFU", false);
