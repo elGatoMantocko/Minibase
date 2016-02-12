@@ -38,7 +38,7 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Gets the current page's id.
   public PageId getCurPage() {
-      return new PageId(getIntValue(16));
+    return new PageId(getIntValue(16));
   }
 
   //    Sets the current page's id.
@@ -48,7 +48,7 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Gets the next page's id.
   public PageId getNextPage() {
-      return new PageId(getIntValue(12));
+    return new PageId(getIntValue(12));
   }
 
   //    Sets the next page's id.
@@ -58,7 +58,7 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Gets the previous page's id.
   public PageId getPrevPage() {
-      return new PageId(getIntValue(16));
+    return new PageId(getIntValue(16));
   }
 
   //    Sets the previous page's id.
@@ -73,12 +73,29 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Gets the RID of the first record on the page, or null if none.
   public RID firstRecord() {
+    short slotcount = getShortValue(0);
+    short slotlength;
+
+    int i;
+    // find the first slot that has a record
+    for (i = 0; i < slotcount; i++) {
+      slotlength = getSlotLength(i);
+      if (slotlength != -1) {
+        break;
+      }
+    }
+
+    if (i == slotcount) {
       return null;
+    }
+    else {
+      return new RID(new PageId(getIntValue(16)), i);
+    }
   }
 
   //    Gets the amount of free space (in bytes).
   public short getFreeSpace() {
-      return getShortValue(4);
+    return getShortValue(4);
   }
 
   //    Gets the number of slots on the page.
@@ -88,7 +105,7 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Gets the length of the record referenced by the given slot.
   public short getSlotLength(int slotno) {
-    return 0;
+    return getShortValue(20 + 4 * slotno);
   }
 
   //    Gets the offset of the record referenced by the given slot.
@@ -96,7 +113,7 @@ public class HFPage extends Page implements GlobalConst {
     return 0;
   }
 
-  //    Returns true if the iteration has more elements.
+  //  Returns true if the iteration has more elements.
   public boolean hasNext(RID curRid) {
     return true;
   }
