@@ -8,8 +8,9 @@ import global.Page;
 import global.PageId;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.nio.Buffer;
+import java.util.*;
 
 /**
  * Created by david on 2/3/16.
@@ -31,9 +32,11 @@ public class BufMgr {
      */
     public BufMgr(int numbufs, int lookAheadSize, String replacementPolicy) {
         //Allocate an array of buffers with given size.
-        mBuffer = new HashMap<PageId, Frame>(numbufs);
+        mBuffer = new HashMap<PageId, Frame>();
         this.mNumBufs = numbufs;
         //save numbufs.
+
+
     }
 
     /**
@@ -54,23 +57,55 @@ public class BufMgr {
      * @param page      the pointer point to the page.
      * @param emptyPage true (empty page); false (non-empty page)
      */
-    public void pinPage(PageId pageno, Page page, boolean emptyPage /*assume false*/) throws ChainException {
+    public void pinPage(PageId pageno, Page page, boolean emptyPage /*assume false*/)
+            throws ChainException, InvalidPageNumberException {
         //check if already exists in pool.
         if(!mBuffer.containsKey(pageno)) {
             //Is not loaded in memory.
 
             //Load page into replacement candidate. (while writing old page if dirty).
             try {
+                checkBufferSpaceAvailable();
                 Minibase.DiskManager.read_page(pageno, page);
-                //if mBuffer.size == getNumFrames()
-                    //clearFrames(1) //throws IllegalStateException if all pinned.
                 mBuffer.put(pageno, new Frame(pageno, page)); //TODO: Need to limit the frames.
-
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (FileIOException e) {
                 e.printStackTrace();
             }
         }
         mBuffer.get(pageno).pin();
+    }
+
+    /**
+     * Implementation of the replacement policy.
+     * This method requests that i items be removed from mBuffer and
+     * flushed if dirty. This will fail if all frames are pinned.
+     * @param i
+     */
+    private void clearFrames(int i) throws BufferPoolExceededException {
+        if(getNumPinned() == getNumBuffers()) throw new BufferPoolExceededException();
+
+        Map.Entry<PageId, Frame> lowestFreq = null;
+        for(Map.Entry<PageId, Frame> entry: mBuffer.entrySet()) {
+            Frame frame = entry.getValue();
+            if(!frame.isPinned()) {
+                if(lowestFreq == null) lowestFreq = entry;
+                else if(frame.getFrequencyCount() < lowestFreq.getValue().getFrequencyCount()) {
+                    lowestFreq = entry;
+                }
+            }
+        }
+        if(lowestFreq == null)
+            throw new BufferPoolExceededException();
+
+        try {
+            flushPage(lowestFreq.getKey());
+        } catch (InvalidPageNumberException e) {
+            e.printStackTrace();
+        } catch (PagePinnedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -91,6 +126,7 @@ public class BufMgr {
      */
     public void unpinPage(PageId pageno, boolean dirty) throws ChainException /*, PageUnpinnedException*/ {
         Frame frame = mBuffer.get(pageno);
+        if(frame == null) throw new HashEntryNotFoundException();
         frame.unpin(); //throws PageUnpinnedException if page is not pinned.
         if(dirty) {
             frame.markDirty();
@@ -110,25 +146,29 @@ public class BufMgr {
      * @param howmany   total number of allocated new pages.
      * @return the first page id of the new pages.__ null, if error.
      */
-    public PageId newPage(Page firstpage, int howmany) {
-        //if mBuffer.size == getNumFrames()
-            //clearFrames(1) //throws IllegalStateException if all pinned.
-            //catch Exception
-                //return null
+    public PageId newPage(Page firstpage, int howmany) throws ChainException {
+        checkBufferSpaceAvailable();
 
-        //allocate page in diskManager.
+            //allocate page in diskManager.
         try {
             //Load first page into memory
             //pin it.
             PageId pageId = Minibase.DiskManager.allocate_page(howmany);
             pinPage(pageId, firstpage, false);
             return pageId;
-        } catch (ChainException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void checkBufferSpaceAvailable() throws BufferPoolExceededException {
+        if(mBuffer.size() == getNumBuffers()) {
+            clearFrames(1); //throws IllegalStateException if all pinned.
+        }
+        if(mBuffer.size() == getNumBuffers()) {
+            throw new BufferPoolExceededException();
+        }
     }
 
     /**
@@ -143,7 +183,7 @@ public class BufMgr {
         //run diskmgr.deallocate*
         if(mBuffer.containsKey(globalPageId)) {
             if(mBuffer.get(globalPageId).isPinned()) {
-                throw new ChainException();
+                throw new PagePinnedException();
             }
             mBuffer.remove(globalPageId);
         }
@@ -156,42 +196,43 @@ public class BufMgr {
      *
      * @param pageid the page number in the database.
      */
-    public void flushPage(PageId pageid) throws InvalidPageNumberException {
+    public void flushPage(PageId pageid) throws PagePinnedException, InvalidPageNumberException {
         //call write_page to write page to disk
         if(mBuffer.containsKey(pageid)) {
             Frame frame = mBuffer.get(pageid);
             if(frame.isPinned()) {
-                throw new RuntimeException(); // Cannot flush a pinned page!
+                throw new PagePinnedException(); // Cannot flush a pinned page!
             }
             if(frame.isDirty()) {
-                try {
-                    Minibase.DiskManager.write_page(pageid, frame.getPage());
-                } catch (FileIOException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+                writeToDisk(pageid, frame.getPage());
                 mBuffer.remove(pageid);
             }
+        }
+    }
+
+    private void writeToDisk(PageId pid, Page page) throws InvalidPageNumberException {
+        try {
+            Minibase.DiskManager.write_page(pid, page);
+        } catch (FileIOException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     /**
      * Used to flush all dirty pages in the buffer pool to disk
      */
-    public void flushAllPages() {
+    public void flushAllPages() throws PagePinnedException, InvalidPageNumberException {
         //loop app pages in buffer and write dirty to disk
         //QUESTION: Do we remove them from the buffer or just set to no longer dirty?
+        ArrayList<PageId> pageIds = new ArrayList<PageId>();
+
         for(Map.Entry<PageId, Frame> entry : mBuffer.entrySet()) {
-            if(entry.getValue().isDirty()) {
-                try {
-                    flushPage(entry.getKey());
-                } catch (InvalidPageNumberException e) {
-                    e.printStackTrace();
-                }
-            }
+            pageIds.add(entry.getKey());
         }
+        for(PageId pid : pageIds) flushPage(pid);
+        mBuffer.clear();
     }
 
     /**
@@ -206,6 +247,16 @@ public class BufMgr {
      * Returns the total number of unpinned buffer frames.
      */
     public int getNumUnpinned() {
-        return 0;
+        return getNumBuffers() - getNumPinned();
+    }
+
+    public int getNumPinned() {
+        int numPinned = 0;
+        for(Map.Entry<PageId, Frame> entry : mBuffer.entrySet()) {
+            if (entry.getValue().isPinned()) {
+                numPinned++;
+            }
+        }
+        return numPinned;
     }
 }

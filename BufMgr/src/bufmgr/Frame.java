@@ -13,6 +13,7 @@ public class Frame {
     protected PageId pageid;
     protected Page page;
     protected int pinCount;
+    protected short frequencyCount;
 
     public Frame() {
         this.isDirty = false;
@@ -35,9 +36,10 @@ public class Frame {
 
     public void pin() {
         pinCount++;
+        bumpFrequencyCount();
     }
 
-    public void unpin() {
+    public void unpin() throws PageUnpinnedException {
         if(getPinCount() == 0) {
             throw new PageUnpinnedException();
         }
@@ -94,6 +96,14 @@ public class Frame {
     public boolean containsSamePage(Page p) {
         if(this.page == p) return true;
         return Arrays.equals(this.page.getData(), p.getData());
+    }
+
+    private void bumpFrequencyCount() {
+        frequencyCount++;
+    }
+
+    public short getFrequencyCount() {
+        return frequencyCount;
     }
 }
 

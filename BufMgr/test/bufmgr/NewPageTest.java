@@ -1,5 +1,6 @@
 package bufmgr;
 
+import chainexception.ChainException;
 import global.Page;
 import global.PageId;
 import org.junit.Before;
@@ -20,25 +21,25 @@ public class NewPageTest extends BufMgrTest {
     }
 
     @Test
-    public void testNewPage() {
+    public void testNewPage() throws ChainException {
         mPageId = mBufManager.newPage(mPage, 1);
         assertNotNull(mPageId);
     }
 
     @Test
-    public void testShouldReturnPageId() {
+    public void testShouldReturnPageId() throws ChainException {
         mPageId = mBufManager.newPage(mPage, 1);
         assertNotNull(mPageId);
     }
 
     @Test
-    public void testShouldBufferPage() {
+    public void testShouldBufferPage() throws ChainException {
         mPageId = mBufManager.newPage(mPage, 1);
         assertTrue(mBufManager.mBuffer.containsKey(mPageId));
     }
 
     @Test
-    public void testShouldPinPage() {
+    public void testShouldPinPage() throws ChainException {
         mPageId = mBufManager.newPage(mPage, 1);
         assertTrue(mBufManager.mBuffer.get(mPageId).isPinned());
     }
