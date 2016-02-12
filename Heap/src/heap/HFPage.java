@@ -138,9 +138,10 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Selects a record from the page.
   public Tuple selectRecord(RID rid) {
-    // make sure the record is not empty
-    if (getSlotLength(rid.slotno) == EMPTY_SLOT) {
-      throw new IllegalArgumentException("The record is empty");
+    // make sure the record is valid
+    if ((rid.pageno.pid != getIntValue(CUR_PAGE) || rid.slotno < 0 || rid.slotno > getShortValue(SLOT_COUNT)) || 
+        (getSlotLength(rid.slotno) == EMPTY_SLOT)) {
+      throw new IllegalArgumentException("Invalid record");
     }
 
     short l = rid.getLength();
