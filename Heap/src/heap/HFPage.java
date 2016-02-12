@@ -10,26 +10,27 @@ import global.RID;
  */
 public class HFPage extends Page implements GlobalConst {
 
+  protected static final int SLOT_COUNT = 0;
+  protected static final int USED_POINTER = 2;
+  protected static final int FREE_SPACE = 4;
+
+  protected static final int PREV_PAGE = 8;
+  protected static final int NEXT_PAGE = 12;
+  protected static final int CUR_PAGE = 16;
+
+  protected static final int HEADER_SIZE = 20;
+  protected static final int SLOT_SIZE = 4;
+
   // there should be a collection of <PID, SlotNum> RIDs here
 
   public HFPage() {
-    // slot count
-    setShortValue((short)0, 0);
+    setShortValue((short)0, SLOT_COUNT);
+    setShortValue((short)PAGE_SIZE, USED_POINTER);
+    setShortValue((short)(PAGE_SIZE - HEADER_SIZE), FREE_SPACE);
 
-    // last used pointer to a record
-    setShortValue((short)PAGE_SIZE, 2);
-
-    // free space
-    setShortValue((short)1004, 4);
-
-    // prev page
-    setIntValue(-1, 8);
-    
-    // next page
-    setIntValue(-1, 12);
-    
-    // curr page
-    setIntValue(-1, 16);
+    setIntValue(-1, PREV_PAGE);
+    setIntValue(-1, NEXT_PAGE);
+    setIntValue(-1, CUR_PAGE);
   }
 
   public HFPage(Page page) {
@@ -137,10 +138,15 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Selects a record from the page.
   public Tuple selectRecord(RID rid) {
+    // make sure the record is not empty
+    if (getSlotLength(rid.slotno) == EMPTY_SLOT) {
+      throw new IllegalArgumentException("The record is empty");
+    }
+
     short l = rid.getLength();
-    byte r[] = new byte[l];
-    System.arraycopy(data, getSlotOffset(rid.slotno), r, 0, l);
-    return new Tuple(new byte[l], 0, l);
+    byte rec[] = new byte[l];
+    System.arraycopy(data, getSlotOffset(rid.slotno), rec, 0, l);
+    return new Tuple(rec, 0, l);
   }
 
   //    Updates a record on the page.
