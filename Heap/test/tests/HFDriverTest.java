@@ -26,7 +26,7 @@ public class HFDriverTest {
 //      mDriver.runTests();
 //  }
 
-  @Test
+  @Test @Ignore
   public void testTest1() throws Exception {
       assertTrue("Test 1 had an error", mDriver.test1());
   }
