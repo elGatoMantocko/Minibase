@@ -6,9 +6,6 @@ import global.Convert;
 import global.GlobalConst;
 import global.Minibase;
 import global.RID;
-import heap.HeapFile;
-import heap.HeapScan;
-import heap.Tuple;
 
 import java.io.IOException;
 
@@ -25,10 +22,13 @@ public class HFPageTest implements GlobalConst {
   @Before
   public void setUp() throws Exception {
     hf = new HFPage();
+    hf.print();
+
+    new Minibase("test.minibase", 1000, 10, 0, "LFU", false);
   }
 
   @Test
   public void testPrint() {
-    hf.print();
+
   }
 }
