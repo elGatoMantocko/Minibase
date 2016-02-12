@@ -74,7 +74,7 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Gets the RID of the first record on the page, or null if none.
   public RID firstRecord() {
-    short slotcount = getShortValue(0);
+    short slotcount = getShortValue(SLOT_COUNT);
     short slotlength;
 
     int i;
@@ -103,7 +103,7 @@ public class HFPage extends Page implements GlobalConst {
 
   //    Gets the number of slots on the page.
   public short getSlotCount() {
-    return getShortValue(0);
+    return getShortValue(SLOT_COUNT);
   }
 
   //    Gets the length of the record referenced by the given slot.
