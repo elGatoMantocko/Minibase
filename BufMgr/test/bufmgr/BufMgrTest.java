@@ -1,9 +1,11 @@
 package bufmgr;
 
 import global.Minibase;
-import junit.framework.Assert;
+import global.Page;
+import global.PageId;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,16 +19,16 @@ import static org.junit.Assert.assertEquals;
  */
 public class BufMgrTest {
     static int NUM_BUFFERS = 10;
-
+    static int NUM_PAGES = 100;
     BufMgr mBufManager;
 
     @Before
     public void createMinibase() throws Exception {
-        new Minibase("test_db.minibase", 100, NUM_BUFFERS, 0, "", false);
+        new Minibase("test_db.minibase", NUM_PAGES, NUM_BUFFERS, 0, "", false);
         mBufManager = Minibase.BufferManager;
     }
 
-    @Test
+    @Test @Ignore
     public void testCleanCreate() {
         assertEquals(0, Minibase.BufferManager.getNumPinned());
     }
@@ -47,4 +49,17 @@ public class BufMgrTest {
         Minibase.DiskManager.DBDestroy();
     }
 
+    @Test
+    public void testGetNumUnpinned() throws Exception {
+        Minibase.BufferManager.flushAllPages();
+        Minibase.BufferManager.pinPage(new PageId(NUM_PAGES/2), new Page(), false);
+        assertEquals(Minibase.BufferManager.getNumBuffers() - 1, Minibase.BufferManager.getNumUnpinned());
+    }
+
+    @Test
+    public void testGetNumPinned() throws Exception {
+        Minibase.BufferManager.flushAllPages();
+        Minibase.BufferManager.pinPage(new PageId(NUM_PAGES/2), new Page(), false);
+        assertEquals(1, Minibase.BufferManager.getNumPinned());
+    }
 }

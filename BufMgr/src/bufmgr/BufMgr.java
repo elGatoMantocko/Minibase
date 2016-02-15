@@ -3,20 +3,19 @@ package bufmgr;
 import chainexception.ChainException;
 import diskmgr.FileIOException;
 import diskmgr.InvalidPageNumberException;
+import global.GlobalConst;
 import global.Minibase;
 import global.Page;
 import global.PageId;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.nio.Buffer;
 import java.util.*;
 
 /**
  * Created by david on 2/3/16.
  */
-public class BufMgr {
-    private final int mNumBufs;
+public class BufMgr implements GlobalConst {
+    private int mNumBufs;
     Map<PageId, Frame> mBuffer;
 
     /**
@@ -35,8 +34,6 @@ public class BufMgr {
         mBuffer = new HashMap<PageId, Frame>();
         this.mNumBufs = numbufs;
         //save numbufs.
-
-
     }
 
     /**
@@ -67,7 +64,7 @@ public class BufMgr {
             try {
                 checkBufferSpaceAvailable();
                 Minibase.DiskManager.read_page(pageno, page);
-                mBuffer.put(pageno, new Frame(pageno, page)); //TODO: Need to limit the frames.
+                mBuffer.put(new PageId(pageno.pid), new Frame(new PageId(pageno.pid), page)); //TODO: Need to limit the frames.
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (FileIOException e) {
@@ -79,13 +76,28 @@ public class BufMgr {
 
     /**
      * Implementation of the replacement policy.
-     * This method requests that i items be removed from mBuffer and
+     * This method requests that 1 item be removed from mBuffer and
      * flushed if dirty. This will fail if all frames are pinned.
-     * @param i
      */
-    private void clearFrames(int i) throws BufferPoolExceededException {
+    protected void pruneBuffer() throws BufferPoolExceededException {
         if(getNumPinned() == getNumBuffers()) throw new BufferPoolExceededException();
 
+        PageId victim = selectVictim();
+
+        if(victim == null)
+            throw new BufferPoolExceededException();
+
+        try {
+            flushPage(victim);
+            mBuffer.remove(victim);
+        } catch (InvalidPageNumberException e) {
+            e.printStackTrace();
+        } catch (PagePinnedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected PageId selectVictim() throws BufferPoolExceededException {
         Map.Entry<PageId, Frame> lowestFreq = null;
         for(Map.Entry<PageId, Frame> entry: mBuffer.entrySet()) {
             Frame frame = entry.getValue();
@@ -96,16 +108,7 @@ public class BufMgr {
                 }
             }
         }
-        if(lowestFreq == null)
-            throw new BufferPoolExceededException();
-
-        try {
-            flushPage(lowestFreq.getKey());
-        } catch (InvalidPageNumberException e) {
-            e.printStackTrace();
-        } catch (PagePinnedException e) {
-            e.printStackTrace();
-        }
+        return (lowestFreq == null) ? null : lowestFreq.getKey();
     }
 
     /**
@@ -146,25 +149,41 @@ public class BufMgr {
      * @param howmany   total number of allocated new pages.
      * @return the first page id of the new pages.__ null, if error.
      */
-    public PageId newPage(Page firstpage, int howmany) throws ChainException {
-        checkBufferSpaceAvailable();
-
-            //allocate page in diskManager.
+    public PageId newPage(Page firstpage, int howmany) {
+        try {
+            checkBufferSpaceAvailable();
+        } catch (BufferPoolExceededException e) {
+            return null;
+        }
+        PageId pageId = null;
+        //allocate page in diskManager.
         try {
             //Load first page into memory
             //pin it.
-            PageId pageId = Minibase.DiskManager.allocate_page(howmany);
+            pageId = Minibase.DiskManager.allocate_page(howmany);
             pinPage(pageId, firstpage, false);
             return pageId;
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InvalidPageNumberException e) {
+            e.printStackTrace();
+        } catch (ChainException e) {
+            e.printStackTrace();
+        } finally {
+            if(pageId != null) {
+                try {
+                    Minibase.DiskManager.deallocate_page(pageId, howmany);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return null;
     }
 
     private void checkBufferSpaceAvailable() throws BufferPoolExceededException {
         if(mBuffer.size() == getNumBuffers()) {
-            clearFrames(1); //throws IllegalStateException if all pinned.
+            pruneBuffer(); //throws IllegalStateException if all pinned.
         }
         if(mBuffer.size() == getNumBuffers()) {
             throw new BufferPoolExceededException();
@@ -210,7 +229,7 @@ public class BufMgr {
         }
     }
 
-    private void writeToDisk(PageId pid, Page page) throws InvalidPageNumberException {
+    protected void writeToDisk(PageId pid, Page page) throws InvalidPageNumberException {
         try {
             Minibase.DiskManager.write_page(pid, page);
         } catch (FileIOException e) {
@@ -247,7 +266,13 @@ public class BufMgr {
      * Returns the total number of unpinned buffer frames.
      */
     public int getNumUnpinned() {
-        return getNumBuffers() - getNumPinned();
+//        int numUnPinned = 0;
+//        for(Map.Entry<PageId, Frame> entry : mBuffer.entrySet()) {
+//            if (!entry.getValue().isPinned()) {
+//                numUnPinned++;
+//            }
+//        }
+        return mNumBufs - getNumPinned();
     }
 
     public int getNumPinned() {

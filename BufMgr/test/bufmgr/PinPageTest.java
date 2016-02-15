@@ -30,15 +30,8 @@ public class PinPageTest extends BufMgrTest {
         Page p = new Page();
         Minibase.BufferManager.pinPage(mPageId, p, false);
 
-        assertTrue(Minibase.BufferManager.mBuffer.containsKey(mPageId));
-        boolean exists = false;
-        for(Map.Entry<PageId, Frame> entry : Minibase.BufferManager.mBuffer.entrySet()) {
-            if(entry.getValue().containsSamePage(p)) {
-                exists = true;
-                break;
-            }
-        }
-        assertTrue("the page exists in the buffer", exists);
+        assertTrue("The pageid is in the buffer", Minibase.BufferManager.mBuffer.containsKey(mPageId));
+        assertNotNull("The frame for that page id is in the buffer", Minibase.BufferManager.mBuffer.get(mPageId));
     }
 
     @Test

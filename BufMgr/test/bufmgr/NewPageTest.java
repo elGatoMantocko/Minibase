@@ -6,6 +6,8 @@ import global.PageId;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static org.junit.Assert.*;
 
 /**
@@ -21,25 +23,25 @@ public class NewPageTest extends BufMgrTest {
     }
 
     @Test
-    public void testNewPage() throws ChainException {
+    public void testNewPage() throws ChainException, IOException {
         mPageId = mBufManager.newPage(mPage, 1);
         assertNotNull(mPageId);
     }
 
     @Test
-    public void testShouldReturnPageId() throws ChainException {
+    public void testShouldReturnPageId() throws ChainException, IOException {
         mPageId = mBufManager.newPage(mPage, 1);
         assertNotNull(mPageId);
     }
 
     @Test
-    public void testShouldBufferPage() throws ChainException {
+    public void testShouldBufferPage() throws ChainException, IOException {
         mPageId = mBufManager.newPage(mPage, 1);
         assertTrue(mBufManager.mBuffer.containsKey(mPageId));
     }
 
     @Test
-    public void testShouldPinPage() throws ChainException {
+    public void testShouldPinPage() throws ChainException, IOException {
         mPageId = mBufManager.newPage(mPage, 1);
         assertTrue(mBufManager.mBuffer.get(mPageId).isPinned());
     }
