@@ -10,9 +10,15 @@ TEST_DIR=./test
 TEST_NAMES=\
 tests.BMDriverTest \
 bufmgr.BufMgrTest \
+bufmgr.FlushPageTest \
 bufmgr.FrameTest \
+bufmgr.FreePageTest \
+bufmgr.LifecycleTest \
+bufmgr.NewPageTest \
+bufmgr.PinPageTest \
+bufmgr.SelectVictimTest \
 bufmgr.UnpinPageTest \
-bufmgr.NewPageTest
+bufmgr.WritePageTest
 
 TEST_SOURCES=\
 ./test/tests/*.java \

@@ -20,7 +20,7 @@ public class BMDriverTest {
      * The driver needs to init things in runTests, so it needs to be
      * run like this, unfortunately.
      */
-    @Test
+    @Test @Ignore
     public void testRunTests() {
         assertTrue(mDriver.runTests());
     }
