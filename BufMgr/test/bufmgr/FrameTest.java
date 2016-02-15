@@ -77,4 +77,5 @@ public class FrameTest {
     public void testGetPageId() throws Exception {
         assertEquals(mFrame.getPageId(), mPageId);
     }
+
 }

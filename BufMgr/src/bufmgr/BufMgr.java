@@ -152,11 +152,6 @@ public class BufMgr implements GlobalConst {
      * @return the first page id of the new pages.__ null, if error.
      */
     public PageId newPage(Page firstpage, int howmany) {
-        try {
-            checkBufferSpaceAvailable();
-        } catch (BufferPoolExceededException e) {
-            return null;
-        }
         PageId pageId = null;
         //allocate page in diskManager.
         try {
@@ -166,7 +161,6 @@ public class BufMgr implements GlobalConst {
             pinPage(pageId, firstpage, false);
             return pageId;
         } catch (Exception e) {
-            e.printStackTrace();
             if(pageId != null) {
                 try {
                     Minibase.DiskManager.deallocate_page(pageId, howmany);
@@ -179,12 +173,9 @@ public class BufMgr implements GlobalConst {
         return null;
     }
 
-    private void checkBufferSpaceAvailable() throws BufferPoolExceededException {
+    protected void checkBufferSpaceAvailable() throws BufferPoolExceededException {
         if(mBuffer.size() == getNumBuffers()) {
             pruneBuffer(); //throws IllegalStateException if all pinned.
-        }
-        if(mBuffer.size() == getNumBuffers()) {
-            throw new BufferPoolExceededException();
         }
     }
 
