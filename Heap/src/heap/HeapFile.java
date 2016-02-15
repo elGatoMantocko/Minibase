@@ -20,12 +20,12 @@ import com.sun.net.httpserver.Filter;
  **/
 public class HeapFile implements GlobalConst {
   private HFPage hfpage;
+  private PageId firstid;
   String filename;
 
   public HeapFile(String name) throws Exception {
     this.filename = name;
     boolean exists = true;
-    PageId firstid;
 
     if (name != null) {
       Page p = new Page();
@@ -55,7 +55,34 @@ public class HeapFile implements GlobalConst {
   }
 
   public RID insertRecord(byte[] record) throws ChainException {
-    return null;
+    boolean found;
+
+    HFPage curDirPage = new HFPage();
+    PageId curDirPid = new PageId(firstid.pid);
+
+    HFPage curDataPage = new HFPage();
+    Minibase.BufferManager.pinPage(curDirPid, curDirPage, false);
+
+    found = false;
+    byte[] data;
+
+    // find space for the record
+    // while we haven't guaranteed a slot for the record
+    while (found == false) {
+      // loop over the records in the current data page
+      for (RID curDataPageRID = curDirPage.firstRecord(); 
+          curDataPageRID != null; 
+          curDataPageRID = curDirPage.nextRecord(curDataPageRID)) {
+        data = curDirPage.selectRecord(curDataPageRID);
+      }
+    }
+
+    RID rid;
+    rid = curDataPage.insertRecord(record);
+
+    Minibase.BufferManager.unpinPage(curDirPid, true);
+
+    return rid;
   }
 
   public Tuple getRecord(RID rid) {
