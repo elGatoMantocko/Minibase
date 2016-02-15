@@ -12,24 +12,44 @@ import com.sun.net.httpserver.Filter;
 /**
  * Created by david on 2/5/16.
  */
+
+/**
+ * Create a new HeapFile opject
+ *  
+ * @exception IOException 
+ **/
 public class HeapFile implements GlobalConst {
   private HFPage hfpage;
-  String fileName;
+  String filename;
 
-  public HeapFile(String name) {
-    this.fileName = name;
-
+  public HeapFile(String name) throws Exception {
+    this.filename = name;
     boolean exists = true;
     PageId firstid;
 
     if (name != null) {
       Page p = new Page();
-      firstid = Minibase.DiskManager.get_file_entry(name);
-      if (firstid == null) {
-        firstid = Minibase.BufferManager.newPage(p, 1);
-      }
-      else {
-        Minibase.BufferManager.pinPage(firstid, p, false);
+
+      try {
+        firstid = Minibase.DiskManager.get_file_entry(name);
+        if (firstid == null) {
+          firstid = Minibase.BufferManager.newPage(p, 1);
+          Minibase.DiskManager.add_file_entry(filename, firstid);
+
+          HFPage hfp = new HFPage(p);
+          hfp.setCurPage(firstid);
+
+          PageId badPID = new PageId(INVALID_PAGEID);
+          hfp.setNextPage(badPID);
+          hfp.setPrevPage(badPID);
+
+          Minibase.BufferManager.unpinPage(firstid, true);
+        }
+        else {
+          Minibase.BufferManager.unpinPage(firstid, true);
+        }
+      } catch(Exception e){
+        e.printStackTrace();
       }
     }
   }

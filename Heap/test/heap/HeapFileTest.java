@@ -27,22 +27,16 @@ public class HeapFileTest {
   private final static boolean OK = true;
   private final static boolean FAIL = false;
 
-  private int choice;
-  private final static int reclen = 32;
+  private final static int REC_LEN = 32;
 
   HeapFile f;
-  RID rid;
 
   @Before
-  public void setUp() throws Exception {
-    boolean status = OK;
-    RID rid = new RID();
-    f = null;
-
+  public void createDatabase() throws Exception {
     new Minibase("test.minibase", 1000, 10, 0, "LFU", false);
   }
 
-  @Test @Ignore
+  @Test
   public void testNewHeapFile() {
     try {
       f = new HeapFile("file_1");
@@ -52,11 +46,61 @@ public class HeapFileTest {
     }
   }
 
-  @Test @Ignore
+  @Test
   public void testAllPagesUnpinned() {
-    assertNotSame("The heap file has left pages pinned", 
+    assertEquals("The heap file has left pages pinned", 
         Minibase.BufferManager.getNumUnpinned(), 
         Minibase.BufferManager.getNumBuffers());
+  }
+
+  // I think this should be a strong test?
+  @Test @Ignore
+  public void testOneDataPage() {
+
+    try {
+      f = new HeapFile("file_1");
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    for (int i = 0; i < 100; i++) {
+      DummyRecord rec = new DummyRecord(REC_LEN);
+      rec.ival = i;
+      rec.fval = (float) (i * 2.5);
+      rec.name = "record" + i;
+
+      try {
+        RID rid = f.insertRecord(rec.toByteArray());
+        assertEquals(rec.toByteArray(), f.getRecord(rid).getTupleByteArray());
+      } catch(Exception e){
+        e.printStackTrace();
+        fail();
+      }
+    }
+  }
+
+  @Test @Ignore
+  public void testOneDirectoryPage() {
+
+    try {
+      f = new HeapFile("file_1");
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    for (int i = 0; i < 2000; i++) {
+      DummyRecord rec = new DummyRecord(REC_LEN);
+      rec.ival = i;
+      rec.fval = (float) (i * 2.5);
+      rec.name = "record" + i;
+
+      try {
+        RID rid = f.insertRecord(rec.toByteArray());
+      } catch(Exception e){
+        e.printStackTrace();
+        fail();
+      }
+    }
   }
 
   @Test @Ignore
