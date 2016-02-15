@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static junit.framework.TestCase.assertNotNull;
+
 /**
  * Created by david on 2/12/16.
  */
@@ -46,14 +48,13 @@ public class LifecycleTest extends BufMgrTest implements GlobalConst{
         Minibase.BufferManager.pinPage(new PageId(NUM_BUFFERS), new Page(), false);
     }
 
-    @Test(expected=BufferPoolExceededException.class) @Ignore
+    @Test(expected=BufferPoolExceededException.class)
     public void testTooManyNewPages() throws ChainException, IOException {
         Minibase.BufferManager.flushAllPages();
+        assertNotNull(Minibase.BufferManager.newPage(new Page(), NUM_BUFFERS*2));
 
-        for(int i = 0; i < NUM_BUFFERS; i++) { //Run ten times .
-            Minibase.BufferManager.newPage(new Page(), 1);
+        for(int i = 0; i < NUM_BUFFERS+2; i++) {
+            Minibase.BufferManager.pinPage(new PageId(i), new Page(), false);
         }
-
-        Minibase.BufferManager.pinPage(new PageId(NUM_BUFFERS), new Page(), false);
     }
 }

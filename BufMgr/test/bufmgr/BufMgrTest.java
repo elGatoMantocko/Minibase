@@ -28,11 +28,6 @@ public class BufMgrTest {
         mBufManager = Minibase.BufferManager;
     }
 
-    @Test @Ignore
-    public void testCleanCreate() {
-        assertEquals(0, Minibase.BufferManager.getNumPinned());
-    }
-
     @Test
     public void testBufferInitialized() {
         assertNotNull(mBufManager.mBuffer);
@@ -51,14 +46,14 @@ public class BufMgrTest {
 
     @Test
     public void testGetNumUnpinned() throws Exception {
-        Minibase.BufferManager.flushAllPages();
+        Minibase.BufferManager.mBuffer.clear();
         Minibase.BufferManager.pinPage(new PageId(NUM_PAGES/2), new Page(), false);
         assertEquals(Minibase.BufferManager.getNumBuffers() - 1, Minibase.BufferManager.getNumUnpinned());
     }
 
     @Test
     public void testGetNumPinned() throws Exception {
-        Minibase.BufferManager.flushAllPages();
+        Minibase.BufferManager.mBuffer.clear();
         Minibase.BufferManager.pinPage(new PageId(NUM_PAGES/2), new Page(), false);
         assertEquals(1, Minibase.BufferManager.getNumPinned());
     }

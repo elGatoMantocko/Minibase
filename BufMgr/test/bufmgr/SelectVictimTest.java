@@ -17,11 +17,11 @@ import static org.junit.Assert.*;
 public class SelectVictimTest extends BufMgrTest {
     @Before
     public void fillWithData() throws PagePinnedException, InvalidPageNumberException {
-        Minibase.BufferManager.flushAllPages();
+        Minibase.BufferManager.mBuffer.clear();
         int[][] data = {
-                {3,3},
-                {1,1},
-                {2,2}
+                {5,3},
+                {6,1},
+                {7,2}
         };
         for(int[] d : data) {
             insertData(d[0], (short) d[1]);
@@ -36,9 +36,9 @@ public class SelectVictimTest extends BufMgrTest {
     }
 
     @Test
-    public void testCullCullsThird() throws BufferPoolExceededException {
+    public void testSelectVictim() throws BufferPoolExceededException {
         PageId pageId = Minibase.BufferManager.selectVictim();
-        assertEquals("Victim should be number 1", 1, pageId.pid);
+        assertEquals("Victim should be number 6", 6, pageId.pid);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class SelectVictimTest extends BufMgrTest {
     public void testPruneBasic() throws BufferPoolExceededException {
         Minibase.BufferManager.pruneBuffer();
         for(Map.Entry<PageId, Frame> entry : Minibase.BufferManager.mBuffer.entrySet()) {
-            assertNotEquals(1, entry.getKey().pid);
+            assertNotEquals("Buffer should not contain page 6", 6, entry.getKey().pid);
         }
     }
 

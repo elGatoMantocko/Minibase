@@ -23,8 +23,9 @@ public class FlushPageTest extends BufMgrTest implements GlobalConst {
 
     @Test
     public void flushAllTest() throws PagePinnedException, InvalidPageNumberException {
+        int originalSize = Minibase.BufferManager.mBuffer.size();
         Minibase.BufferManager.flushAllPages();
-        assertEquals(0, Minibase.BufferManager.mBuffer.size());
+        assertEquals("Flush pages should not empty the buffer at all.", originalSize, Minibase.BufferManager.mBuffer.size());
     }
 
     @Test(expected=PagePinnedException.class)

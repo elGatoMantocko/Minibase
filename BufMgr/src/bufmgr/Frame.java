@@ -105,5 +105,9 @@ public class Frame {
     public short getFrequencyCount() {
         return frequencyCount;
     }
+
+    public void setClean() {
+        this.isDirty = false;
+    }
 }
 

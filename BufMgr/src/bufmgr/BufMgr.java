@@ -63,8 +63,9 @@ public class BufMgr implements GlobalConst {
             //Load page into replacement candidate. (while writing old page if dirty).
             try {
                 checkBufferSpaceAvailable();
-                Minibase.DiskManager.read_page(pageno, page);
-                mBuffer.put(new PageId(pageno.pid), new Frame(new PageId(pageno.pid), page)); //TODO: Need to limit the frames.
+                Page p = new Page();
+                Minibase.DiskManager.read_page(pageno, p);
+                mBuffer.put(new PageId(pageno.pid), new Frame(new PageId(pageno.pid), p));
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (FileIOException e) {
@@ -72,6 +73,7 @@ public class BufMgr implements GlobalConst {
             }
         }
         mBuffer.get(pageno).pin();
+        page.setPage(mBuffer.get(pageno).getPage());
     }
 
     /**
@@ -163,19 +165,15 @@ public class BufMgr implements GlobalConst {
             pageId = Minibase.DiskManager.allocate_page(howmany);
             pinPage(pageId, firstpage, false);
             return pageId;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (InvalidPageNumberException e) {
-            e.printStackTrace();
-        } catch (ChainException e) {
-            e.printStackTrace();
-        } finally {
             if(pageId != null) {
                 try {
                     Minibase.DiskManager.deallocate_page(pageId, howmany);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
+                mBuffer.remove(pageId);
             }
         }
         return null;
@@ -224,7 +222,7 @@ public class BufMgr implements GlobalConst {
             }
             if(frame.isDirty()) {
                 writeToDisk(pageid, frame.getPage());
-                mBuffer.remove(pageid);
+                frame.setClean();
             }
         }
     }
@@ -244,14 +242,9 @@ public class BufMgr implements GlobalConst {
      */
     public void flushAllPages() throws PagePinnedException, InvalidPageNumberException {
         //loop app pages in buffer and write dirty to disk
-        //QUESTION: Do we remove them from the buffer or just set to no longer dirty?
-        ArrayList<PageId> pageIds = new ArrayList<PageId>();
-
         for(Map.Entry<PageId, Frame> entry : mBuffer.entrySet()) {
-            pageIds.add(entry.getKey());
+            flushPage(entry.getKey());
         }
-        for(PageId pid : pageIds) flushPage(pid);
-        mBuffer.clear();
     }
 
     /**
