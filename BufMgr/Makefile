@@ -22,7 +22,6 @@ bufmgr.WritePageTest \
 tests.BMDriverTest \
 tests.DBWithPagesTest \
 tests.FullyPinnedBufferTest \
-tests.ProvidedTests \
 tests.WritingPagesTest
 
 TEST_SOURCES=\
