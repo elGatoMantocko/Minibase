@@ -8,7 +8,6 @@ JAVA  = $(JDKPATH)/bin/java
 
 TEST_DIR=./test
 TEST_NAMES=\
-tests.BMDriverTest \
 bufmgr.BufMgrTest \
 bufmgr.FlushPageTest \
 bufmgr.FrameTest \
@@ -19,7 +18,12 @@ bufmgr.NewPageTest \
 bufmgr.PinPageTest \
 bufmgr.SelectVictimTest \
 bufmgr.UnpinPageTest \
-bufmgr.WritePageTest
+bufmgr.WritePageTest \
+tests.BMDriverTest \
+tests.DBWithPagesTest \
+tests.FullyPinnedBufferTest \
+tests.ProvidedTests \
+tests.WritingPagesTest
 
 TEST_SOURCES=\
 ./test/tests/*.java \
