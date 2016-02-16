@@ -56,6 +56,7 @@ public class HeapFile implements GlobalConst {
 
   public RID insertRecord(byte[] record) throws ChainException {
     boolean found;
+    int rlength = record.length;
 
     HFPage curDirPage = new HFPage();
     PageId curDirPid = new PageId(firstid.pid);
@@ -64,16 +65,29 @@ public class HeapFile implements GlobalConst {
     Minibase.BufferManager.pinPage(curDirPid, curDirPage, false);
 
     found = false;
-    byte[] data;
+    Tuple tup;
 
     // find space for the record
     // while we haven't guaranteed a slot for the record
-    while (found == false) {
+    while (!found) {
       // loop over the records in the current data page
       for (RID curDataPageRID = curDirPage.firstRecord(); 
           curDataPageRID != null; 
           curDataPageRID = curDirPage.nextRecord(curDataPageRID)) {
-        data = curDirPage.selectRecord(curDataPageRID);
+        //
+        tup = new Tuple(curDirPage.selectRecord(curDataPageRID), 0, rlength);
+        if (rlength <= curDataPage.getFreeSpace()) {
+          found = true;
+          break;
+        }
+      }
+
+      // how to handle changing the curDataPage and/or curDirPage
+      if (!found) {
+        
+      }
+      else {
+
       }
     }
 
