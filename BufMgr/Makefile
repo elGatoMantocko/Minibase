@@ -14,6 +14,7 @@ bufmgr.FlushPageTest \
 bufmgr.FrameTest \
 bufmgr.FreePageTest \
 bufmgr.LifecycleTest \
+bufmgr.MyHashTableTest \
 bufmgr.NewPageTest \
 bufmgr.PinPageTest \
 bufmgr.SelectVictimTest \

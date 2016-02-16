@@ -31,7 +31,7 @@ public class BufMgr implements GlobalConst {
      */
     public BufMgr(int numbufs, int lookAheadSize, String replacementPolicy) {
         //Allocate an array of buffers with given size.
-        mBuffer = new HashMap<PageId, Frame>();
+        mBuffer = new MyHashTable();
         this.mNumBufs = numbufs;
         //save numbufs.
     }
