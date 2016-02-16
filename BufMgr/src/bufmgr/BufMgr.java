@@ -9,14 +9,14 @@ import global.Page;
 import global.PageId;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
 
 /**
- * Created by david on 2/3/16.
+ * The BufferManager for the Minibase.
  */
 public class BufMgr implements GlobalConst {
-    private int mNumBufs;
-    Map<PageId, Frame> mBuffer;
+    protected final Map<PageId, Frame> mBuffer;
+    private final int mNumberOfBuffers;
 
     /**
      * Create the BufMgr object.
@@ -24,16 +24,16 @@ public class BufMgr implements GlobalConst {
      * make the buffer manage aware that the replacement policy is
      * specified by replacerArg (e.g., LH, Clock, LRU, MRU, LFU, etc.).
      *
-     * @param numbufs           number of buffers in the buffer pool
+     * @param numberOfBuffers           number of buffers in the buffer pool
      * @param lookAheadSize:    Please ignore this parameter
      * @param replacementPolicy Name of the replacement policy, that parameter will be set to "LFU" (you
      *                          can safely ignore this parameter as you will implement only one policy)
      */
-    public BufMgr(int numbufs, int lookAheadSize, String replacementPolicy) {
+    public BufMgr(int numberOfBuffers, int lookAheadSize, String replacementPolicy) {
         //Allocate an array of buffers with given size.
         mBuffer = new MyHashTable();
-        this.mNumBufs = numbufs;
-        //save numbufs.
+        this.mNumberOfBuffers = numberOfBuffers;
+        //save numberOfBuffers.
     }
 
     /**
@@ -55,9 +55,9 @@ public class BufMgr implements GlobalConst {
      * @param emptyPage true (empty page); false (non-empty page)
      */
     public void pinPage(PageId pageno, Page page, boolean emptyPage /*assume false*/)
-            throws ChainException, InvalidPageNumberException {
+            throws ChainException {
         //check if already exists in pool.
-        if(!mBuffer.containsKey(pageno)) {
+        if (!mBuffer.containsKey(pageno)) {
             //Is not loaded in memory.
 
             //Load page into replacement candidate. (while writing old page if dirty).
@@ -82,11 +82,11 @@ public class BufMgr implements GlobalConst {
      * flushed if dirty. This will fail if all frames are pinned.
      */
     protected void pruneBuffer() throws BufferPoolExceededException {
-        if(getNumPinned() == getNumBuffers()) throw new BufferPoolExceededException();
+        if (getNumPinned() == getNumBuffers()) throw new BufferPoolExceededException();
 
         PageId victim = selectVictim();
 
-        if(victim == null)
+        if (victim == null)
             throw new BufferPoolExceededException();
 
         try {
@@ -99,13 +99,13 @@ public class BufMgr implements GlobalConst {
         }
     }
 
-    protected PageId selectVictim() throws BufferPoolExceededException {
+    protected PageId selectVictim() {
         Map.Entry<PageId, Frame> lowestFreq = null;
-        for(Map.Entry<PageId, Frame> entry: mBuffer.entrySet()) {
+        for (Map.Entry<PageId, Frame> entry : mBuffer.entrySet()) {
             Frame frame = entry.getValue();
-            if(!frame.isPinned()) {
-                if(lowestFreq == null) lowestFreq = entry;
-                else if(frame.getFrequencyCount() < lowestFreq.getValue().getFrequencyCount()) {
+            if (!frame.isPinned()) {
+                if (lowestFreq == null) lowestFreq = entry;
+                else if (frame.getFrequencyCount() < lowestFreq.getValue().getFrequencyCount()) {
                     lowestFreq = entry;
                 }
             }
@@ -131,9 +131,9 @@ public class BufMgr implements GlobalConst {
      */
     public void unpinPage(PageId pageno, boolean dirty) throws ChainException /*, PageUnpinnedException*/ {
         Frame frame = mBuffer.get(pageno);
-        if(frame == null) throw new HashEntryNotFoundException();
+        if (frame == null) throw new HashEntryNotFoundException();
         frame.unpin(); //throws PageUnpinnedException if page is not pinned.
-        if(dirty) {
+        if (dirty) {
             frame.markDirty();
         }
     }
@@ -161,7 +161,7 @@ public class BufMgr implements GlobalConst {
             pinPage(pageId, firstpage, false);
             return pageId;
         } catch (Exception e) {
-            if(pageId != null) {
+            if (pageId != null) {
                 try {
                     Minibase.DiskManager.deallocate_page(pageId, howmany);
                 } catch (Exception ex) {
@@ -174,7 +174,7 @@ public class BufMgr implements GlobalConst {
     }
 
     protected void checkBufferSpaceAvailable() throws BufferPoolExceededException {
-        if(mBuffer.size() == getNumBuffers()) {
+        if (mBuffer.size() == getNumBuffers()) {
             pruneBuffer(); //throws IllegalStateException if all pinned.
         }
     }
@@ -189,8 +189,8 @@ public class BufMgr implements GlobalConst {
     public void freePage(PageId globalPageId) throws ChainException {
         //QUESTION: Should this check/clear the buffer? Should it respect pinned status?
         //run diskmgr.deallocate*
-        if(mBuffer.containsKey(globalPageId)) {
-            if(mBuffer.get(globalPageId).isPinned()) {
+        if (mBuffer.containsKey(globalPageId)) {
+            if (mBuffer.get(globalPageId).isPinned()) {
                 throw new PagePinnedException();
             }
             mBuffer.remove(globalPageId);
@@ -206,12 +206,12 @@ public class BufMgr implements GlobalConst {
      */
     public void flushPage(PageId pageid) throws PagePinnedException, InvalidPageNumberException {
         //call write_page to write page to disk
-        if(mBuffer.containsKey(pageid)) {
+        if (mBuffer.containsKey(pageid)) {
             Frame frame = mBuffer.get(pageid);
-            if(frame.isPinned()) {
+            if (frame.isPinned()) {
                 throw new PagePinnedException(); // Cannot flush a pinned page!
             }
-            if(frame.isDirty()) {
+            if (frame.isDirty()) {
                 writeToDisk(pageid, frame.getPage());
                 frame.setClean();
             }
@@ -233,7 +233,7 @@ public class BufMgr implements GlobalConst {
      */
     public void flushAllPages() throws PagePinnedException, InvalidPageNumberException {
         //loop app pages in buffer and write dirty to disk
-        for(Map.Entry<PageId, Frame> entry : mBuffer.entrySet()) {
+        for (Map.Entry<PageId, Frame> entry : mBuffer.entrySet()) {
             flushPage(entry.getKey());
         }
     }
@@ -243,7 +243,7 @@ public class BufMgr implements GlobalConst {
      */
     public int getNumBuffers() {
         //return numBufs
-        return mNumBufs;
+        return mNumberOfBuffers;
     }
 
     /**
@@ -256,12 +256,12 @@ public class BufMgr implements GlobalConst {
 //                numUnPinned++;
 //            }
 //        }
-        return mNumBufs - getNumPinned();
+        return mNumberOfBuffers - getNumPinned();
     }
 
     public int getNumPinned() {
         int numPinned = 0;
-        for(Map.Entry<PageId, Frame> entry : mBuffer.entrySet()) {
+        for (Map.Entry<PageId, Frame> entry : mBuffer.entrySet()) {
             if (entry.getValue().isPinned()) {
                 numPinned++;
             }

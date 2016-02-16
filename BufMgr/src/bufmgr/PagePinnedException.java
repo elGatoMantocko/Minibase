@@ -3,10 +3,9 @@ package bufmgr;
 import chainexception.ChainException;
 
 /**
- * Created by david on 2/12/16.
+ * Thrown when trying to free or otherwise remove a page from the buffer that is pinned.
  */
 public class PagePinnedException extends ChainException {
     public PagePinnedException() {
-
     }
 }

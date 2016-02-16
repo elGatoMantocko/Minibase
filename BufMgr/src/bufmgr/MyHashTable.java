@@ -1,17 +1,24 @@
 package bufmgr;
 
 import global.GlobalConst;
-import global.Page;
 import global.PageId;
 
 import java.util.*;
 
 /**
- * Created by david on 2/15/16.
+ * Custom implementation of a hashtable.
+ *
+ * This class implements the Java Map interface in order to allow the BufferManager to be
+ * built using the Java map FIRST, then swap this in. Most javadoc in this class
+ * is inserted directly from the javadoc for Map.
+ *
+ * This is used my the Buffermanager to hold the map of PageIds to frames.
  */
 public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
 
-    private static int HTSIZE = 7;
+    private static final int HTSIZE = 7;
+    private final List<Entry<PageId, Frame>>[] directory;
+
     /**
      * The hash function must distribute values in the domain of
      * the search field uniformly over the collection of buckets.
@@ -22,12 +29,10 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
      */
     public MyHashTable() {
         directory = new List[HTSIZE];
-        for(int i = 0; i < HTSIZE; i++) {
+        for (int i = 0; i < HTSIZE; i++) {
             directory[i] = new ArrayList<Entry<PageId, Frame>>();
         }
     }
-
-    List<Entry<PageId,Frame>>[] directory;
 
     /**
      * Returns the number of key-value mappings in this map.  If the
@@ -38,7 +43,7 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
      */
     public int size() {
         int size = 0;
-        for(List list : directory) {
+        for (List list : directory) {
             size += list.size();
         }
         return size;
@@ -71,15 +76,15 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
      *                              (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
      */
     public boolean containsKey(Object key) {
-        if(key == null) throw new NullPointerException();
-        if(!(key instanceof PageId)) {
+        if (key == null) throw new NullPointerException();
+        if (!(key instanceof PageId)) {
             throw new ClassCastException("Parameter is not a PageId");
         }
         PageId pid = (PageId) key;
 
         int bucketid = pid.pid % HTSIZE;
-        for(Entry<PageId, Frame> entry : directory[bucketid]) {
-            if(entry.getKey().equals(pid)) return true;
+        for (Entry<PageId, Frame> entry : directory[bucketid]) {
+            if (entry.getKey().equals(pid)) return true;
         }
         return false;
     }
@@ -103,13 +108,13 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
      *                              (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
      */
     public boolean containsValue(Object value) {
-        if(value == null) throw new NullPointerException();
-        if(!(value instanceof Frame)) {
+        if (value == null) throw new NullPointerException();
+        if (!(value instanceof Frame)) {
             throw new ClassCastException("Parameter is not a Frame");
         }
         Frame frame = (Frame) value;
 
-        for(List<Entry<PageId, Frame>> bucket : directory) {
+        for (List<Entry<PageId, Frame>> bucket : directory) {
             for (Entry<PageId, Frame> entry : bucket) {
                 if (entry.getValue().equals(frame)) return true;
             }
@@ -143,15 +148,15 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
      *                              (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
      */
     public Frame get(Object key) {
-        if(key == null) throw new NullPointerException();
-        if(!(key instanceof PageId)) {
+        if (key == null) throw new NullPointerException();
+        if (!(key instanceof PageId)) {
             throw new ClassCastException("Parameter is not a PageId");
         }
         PageId pid = (PageId) key;
 
         int bucketid = pid.pid % HTSIZE;
-        for(Entry<PageId, Frame> entry : directory[bucketid]) {
-            if(entry.getKey().equals(pid)) return entry.getValue();
+        for (Entry<PageId, Frame> entry : directory[bucketid]) {
+            if (entry.getKey().equals(pid)) return entry.getValue();
         }
         return null;
     }
@@ -181,11 +186,11 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
      *                                       or value prevents it from being stored in this map
      */
     public Frame put(PageId pid, Frame value) {
-        if(pid == null || value == null) throw new NullPointerException();
+        if (pid == null || value == null) throw new NullPointerException();
 
         int bucketid = pid.pid % HTSIZE;
-        for(Entry<PageId, Frame> entry : directory[bucketid]) {
-            if(entry.getKey().equals(pid)) {
+        for (Entry<PageId, Frame> entry : directory[bucketid]) {
+            if (entry.getKey().equals(pid)) {
                 Frame oldValue = entry.getValue();
                 entry.setValue(value);
                 return oldValue;
@@ -226,20 +231,20 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
      *                                       (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
      */
     public Frame remove(Object key) {
-        if(key == null) throw new NullPointerException();
-        if(!(key instanceof PageId)) {
+        if (key == null) throw new NullPointerException();
+        if (!(key instanceof PageId)) {
             throw new ClassCastException("Parameter is not a PageId");
         }
         PageId pid = (PageId) key;
 
         int bucketid = pid.pid % HTSIZE;
         Entry<PageId, Frame> toRemove = null;
-        for(Entry<PageId, Frame> entry : directory[bucketid]) {
-            if(entry.getKey().equals(pid)) {
+        for (Entry<PageId, Frame> entry : directory[bucketid]) {
+            if (entry.getKey().equals(pid)) {
                 toRemove = entry;
             }
         }
-        if(toRemove != null) {
+        if (toRemove != null) {
             Frame old = toRemove.getValue();
             directory[bucketid].remove(toRemove);
             return old;
@@ -278,7 +283,7 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
      *                                       is not supported by this map
      */
     public void clear() {
-        for(int i = 0; i < HTSIZE; i++) {
+        for (int i = 0; i < HTSIZE; i++) {
             directory[i] = new ArrayList<Entry<PageId, Frame>>();
         }
     }
@@ -297,12 +302,12 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
      * operations.
      *
      * @return a set view of the keys contained in this map
-     *
+     * <p>
      * NOTE: This implementation is NOT backed by the map.
      */
     public Set<PageId> keySet() {
         Set<PageId> pids = new HashSet<PageId>();
-        for(Entry<PageId, Frame> entry : entrySet()) {
+        for (Entry<PageId, Frame> entry : entrySet()) {
             pids.add(entry.getKey());
         }
         return pids;
@@ -322,12 +327,12 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
      * support the <tt>add</tt> or <tt>addAll</tt> operations.
      *
      * @return a collection view of the values contained in this map
-     *
+     * <p>
      * NOTE: This implementation is NOT backed by the map.
      */
     public Collection<Frame> values() {
         ArrayList<Frame> frames = new ArrayList<Frame>();
-        for(Entry<PageId, Frame> entry : entrySet()) {
+        for (Entry<PageId, Frame> entry : entrySet()) {
             frames.add(entry.getValue());
         }
         return frames;
@@ -348,12 +353,12 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
      * <tt>add</tt> or <tt>addAll</tt> operations.
      *
      * @return a set view of the mappings contained in this map
-     *
+     * <p>
      * NOTE: This implementation is NOT backed by the map.
      */
     public Set<Entry<PageId, Frame>> entrySet() {
         Set<Entry<PageId, Frame>> set = new HashSet<Entry<PageId, Frame>>();
-        for(List<Entry<PageId, Frame>> bucket : directory) {
+        for (List<Entry<PageId, Frame>> bucket : directory) {
             set.addAll(bucket);
         }
         return set;
@@ -361,8 +366,8 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
 
     static class MyEntry implements Map.Entry<PageId, Frame> {
 
-        PageId mPageId;
-        Frame mFrame;
+        private final PageId mPageId;
+        private Frame mFrame;
 
         protected MyEntry(PageId key, Frame value) {
             mFrame = value;
@@ -440,7 +445,7 @@ public class MyHashTable implements Map<PageId, Frame>, GlobalConst {
          * entry
          */
         public boolean equals(Object o) {
-            if(o instanceof MyEntry) {
+            if (o instanceof MyEntry) {
                 MyEntry that = (MyEntry) o;
                 return this.mFrame.equals(that.getValue()) &&
                         this.mPageId.equals(that.getKey());

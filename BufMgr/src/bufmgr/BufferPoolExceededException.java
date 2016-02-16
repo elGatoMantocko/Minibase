@@ -3,7 +3,7 @@ package bufmgr;
 import chainexception.ChainException;
 
 /**
- * Created by david on 2/12/16.
+ * Thrown when the buffer pool is both full and cannot be purged (ie all frames are pinned).
  */
 public class BufferPoolExceededException extends ChainException {
     public BufferPoolExceededException() {

@@ -3,7 +3,7 @@ package bufmgr;
 import chainexception.ChainException;
 
 /**
- * Created by david on 2/9/16.
+ * This is called when unpinning a page that is not pinned.
  */
 public class PageUnpinnedException extends ChainException {
     public PageUnpinnedException() {

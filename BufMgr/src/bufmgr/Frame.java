@@ -6,7 +6,10 @@ import global.PageId;
 import java.util.Arrays;
 
 /**
- * Created by david on 2/9/16.
+ * The frames that will be used in the BufferManager.
+ *
+ * Each frame hold the data about a page and its associated pincount and access
+ * frequency among other information.
  */
 public class Frame {
     protected boolean isDirty;
@@ -40,7 +43,7 @@ public class Frame {
     }
 
     public void unpin() throws PageUnpinnedException {
-        if(getPinCount() == 0) {
+        if (getPinCount() == 0) {
             throw new PageUnpinnedException();
         }
         pinCount--;
@@ -68,8 +71,8 @@ public class Frame {
 
     @Override
     public boolean equals(Object object) {
-        if(this == object) return true;
-        if(!(object instanceof Frame)) return false;
+        if (this == object) return true;
+        if (!(object instanceof Frame)) return false;
         Frame frame = (Frame) object;
         return this.isDirty == frame.isDirty() &&
                 this.pageid == frame.getPageId() &&
@@ -80,6 +83,7 @@ public class Frame {
     /**
      * Page has no equals method, and since it is a library class we need
      * to implement this check here.
+     *
      * @param that The other frame we are comparing against.
      * @return true/false: the equality of this.page and that.page.
      */
@@ -90,12 +94,12 @@ public class Frame {
     /**
      * Similar to the above, this checks the equality of the page in
      * the frame to the given page.
+     *
      * @param p the page to compare
      * @return The equality of the page.
      */
     public boolean containsSamePage(Page p) {
-        if(this.page == p) return true;
-        return Arrays.equals(this.page.getData(), p.getData());
+        return this.page == p || Arrays.equals(this.page.getData(), p.getData());
     }
 
     private void bumpFrequencyCount() {

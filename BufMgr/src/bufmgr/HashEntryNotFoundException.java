@@ -2,10 +2,8 @@ package bufmgr;
 
 import chainexception.ChainException;
 
-import java.util.HashMap;
-
 /**
- * Created by david on 2/12/16.
+ * Thrown when unpinning a pageid that is not in the buffer.
  */
 public class HashEntryNotFoundException extends ChainException {
     public HashEntryNotFoundException() {
