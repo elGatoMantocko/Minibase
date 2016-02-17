@@ -1,5 +1,6 @@
 package diskmgr;
-import chainexception.*;
+
+import chainexception.ChainException;
 
 
 public class DiskMgrException extends ChainException {

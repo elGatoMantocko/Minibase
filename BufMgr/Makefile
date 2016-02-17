@@ -1,18 +1,32 @@
 JDKPATH = /usr
 LIBPATH = lib/bufmgrAssign.jar
-JUNITPATH = /usr/share/java/junit4.jar
 
 CLASSPATH = .:..:$(LIBPATH):$(JUNITPATH)
 BINPATH = $(JDKPATH)/bin
 JAVAC = $(JDKPATH)/bin/javac 
 JAVA  = $(JDKPATH)/bin/java 
 
-TEST_PACKAGE=tests.
-TEST_DIR=./test/tests
-TEST_NAMES=BMDriverTest
-TEST_FILES=$(TEST_NAMES:=.java)
-TEST_SOURCES=$(addprefix $(TEST_DIR)/, $(TEST_FILES))
-TEST_CLASSES=$(TEST_SOURCES:.java=.class)
+TEST_DIR=./test
+TEST_NAMES=\
+bufmgr.BufMgrTest \
+bufmgr.FlushPageTest \
+bufmgr.FrameTest \
+bufmgr.FreePageTest \
+bufmgr.LifecycleTest \
+bufmgr.MyHashTableTest \
+bufmgr.NewPageTest \
+bufmgr.PinPageTest \
+bufmgr.SelectVictimTest \
+bufmgr.UnpinPageTest \
+bufmgr.WritePageTest \
+tests.BMDriverTest \
+tests.DBWithPagesTest \
+tests.FullyPinnedBufferTest \
+tests.WritingPagesTest
+
+TEST_SOURCES=\
+./test/tests/*.java \
+./test/bufmgr/*.java
 
 PROGS = xx
 
@@ -22,13 +36,13 @@ compile:src/*/*.java
 	@mkdir -p ./bin
 	$(JAVAC) -cp $(CLASSPATH) -d bin src/*/*.java
 
-test: $(TEST_CLASSES)
-	$(JAVA) -cp $(CLASSPATH):bin:bin/tests org.junit.runner.JUnitCore $(TEST_PACKAGE)$(TEST_NAMES)
+test: compile_tests
+	$(JAVA) -cp $(CLASSPATH):bin:bin/tests:bin/bufmgr org.junit.runner.JUnitCore $(TEST_NAMES)
 
 xx : compile
 	$(JAVA) -cp $(CLASSPATH):bin tests.BMTest
 
-$(TEST_CLASSES): compile $(TEST_SOURCES)
+compile_tests: compile
 	$(JAVAC) -cp $(CLASSPATH):bin -d bin $(TEST_SOURCES)
 
 clean:
