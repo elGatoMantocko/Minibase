@@ -54,7 +54,7 @@ public class SelectVictimTest extends BufMgrTest {
     public void testPruneBasic() throws BufferPoolExceededException {
         Minibase.BufferManager.pruneBuffer();
         for(Map.Entry<PageId, Frame> entry : Minibase.BufferManager.mBuffer.entrySet()) {
-            assertNotEquals("Buffer should not contain page 6", 6, entry.getKey().pid);
+            assertFalse("Buffer should not contain page 6", 6 == entry.getKey().pid);
         }
     }
 
