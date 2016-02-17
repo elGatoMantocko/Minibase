@@ -169,15 +169,37 @@ public class HeapFile implements GlobalConst {
         currentPage.insertRecord(newRecord.getTupleByteArray());
       }
 
-      return true;
     } catch(Exception e){
       e.printStackTrace();
       throw new InvalidUpdateException();
+    } finally {
+      Minibase.BufferManager.unpinPage(rid.pageno, true);
     }
+
+    return true;
   }
 
   public boolean deleteRecord(RID rid) throws ChainException {
-    //voided
+    HFPage currentPage = new HFPage();
+    try {
+      Minibase.BufferManager.pinPage(rid.pageno, currentPage, false);
+
+      // update the key value pair in the directory
+      short key = currentPage.getFreeSpace();
+      directory.get(key).remove(rid.pageno);
+
+      currentPage.deleteRecord(rid);
+
+      directory.get(currentPage.getFreeSpace()).add(rid.pageno);
+
+    } catch(Exception e){
+      e.printStackTrace();
+      throw new InvalidUpdateException();
+    } finally {
+      Minibase.BufferManager.unpinPage(rid.pageno, true);
+    }
+  
+    return true;
   }
 
   //get number of records in the file
