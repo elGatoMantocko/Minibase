@@ -150,51 +150,15 @@ public class HeapFileTest {
         Minibase.BufferManager.getNumBuffers());
   }
 
+  @Test
+  public void testUpdateRecord() {
+    
+  }
+
   @Test @Ignore
   public void sometest() throws Exception {
 
     /*
-    if ( status == OK ) {
-      System.out.println ("  - Add " + choice + " records to the file\n");
-      for (int i =0; (i < choice) && (status == OK); i++) {
-
-        //fixed length record
-        DummyRecord rec = new DummyRecord(reclen);
-        rec.ival = i;
-        rec.fval = (float) (i*2.5);
-        rec.name = "record" + i;
-
-        try {
-          rid = f.insertRecord(rec.toByteArray());
-        }
-        catch (Exception e) {
-          status = FAIL;
-          System.err.println ("*** Error inserting record " + i + "\n");
-          e.printStackTrace();
-        }
-
-        if ( status == OK && Minibase.BufferManager.getNumUnpinned()
-                != Minibase.BufferManager.getNumBuffers() ) {
-
-          System.err.println ("*** Insertion left a page pinned\n");
-          status = FAIL;
-        }
-      }
-
-      try {
-        if ( f.getRecCnt() != choice ) {
-            status = FAIL;
-            System.err.println ("*** File reports " + f.getRecCnt() + 
-                    " records, not " + choice + "\n");
-        }
-      }
-      catch (Exception e) {
-        status = FAIL;
-        System.out.println (""+e);
-        e.printStackTrace();
-      }
-    }
-
     // In general, a sequential scan won't be in the same order as the
     // insertions.  However, we're inserting fixed-length records here, and
     // in this case the scan must return the insertion order.
