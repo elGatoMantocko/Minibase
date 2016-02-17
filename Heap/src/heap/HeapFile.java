@@ -26,9 +26,11 @@ public class HeapFile implements GlobalConst {
   private HFPage hfpage;
   private PageId firstid;
 
-  String filename;
+  private String filename;
 
-  TreeMap<Short, Integer> directory;
+  private TreeMap<Short, Integer> directory;
+
+  private int reccnt;
 
   public HeapFile(String name) throws Exception {
     // this is a map of pages not records
@@ -122,6 +124,7 @@ public class HeapFile implements GlobalConst {
       Minibase.BufferManager.flushPage(closestGuess);
     }
 
+    reccnt += 1;
     return newRecord;
   }
 
@@ -147,12 +150,13 @@ public class HeapFile implements GlobalConst {
   }
 
   public boolean deleteRecord(RID rid) {
+    reccnt -=1;
     return false;
   }
 
   //get number of records in the file
   public int getRecCnt() {
-    return 0;
+    return reccnt;
   }
 
   public HeapScan openScan() {

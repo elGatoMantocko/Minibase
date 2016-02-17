@@ -29,7 +29,7 @@ public class HeapFileTest {
 
   private final static int REC_LEN = 32;
 
-  HeapFile f;
+  private HeapFile f;
 
   @Before
   public void createDatabase() throws Exception {
@@ -55,7 +55,7 @@ public class HeapFileTest {
 
   // I think this should be a strong test?
   @Test
-  public void testOneHundredRecords() {
+  public void testByteArrayOneHundo() {
 
     try {
       f = new HeapFile("file_1");
@@ -102,6 +102,52 @@ public class HeapFileTest {
         fail();
       }
     }
+  }
+
+  @Test
+  public void testWrongNumInsertedRecords() {
+    try {
+      f = new HeapFile("file_1");
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    DummyRecord rec = new DummyRecord(REC_LEN);
+    rec.ival = 0;
+    rec.fval = (float) (0 * 2.5);
+    rec.name = "record" + 0;
+
+    try {
+      f.insertRecord(rec.toByteArray());
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    assertEquals("Wrong amount of records inserted", f.getRecCnt(), 1);
+  }
+
+  @Test
+  public void testUnpinnedAfterInsert() {
+    try {
+      f = new HeapFile("file_1");
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    DummyRecord rec = new DummyRecord(REC_LEN);
+    rec.ival = 0;
+    rec.fval = (float) (0 * 2.5);
+    rec.name = "record" + 0;
+
+    try {
+      f.insertRecord(rec.toByteArray());
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    assertEquals("The heap file has left pages pinned", 
+        Minibase.BufferManager.getNumUnpinned(), 
+        Minibase.BufferManager.getNumBuffers());
   }
 
   @Test @Ignore
