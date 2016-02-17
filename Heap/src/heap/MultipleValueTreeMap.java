@@ -61,6 +61,31 @@ public class MultipleValueTreeMap implements Map<Short, PageId> {
         return mMap;
     }
 
+    public void remove(PageId value) {
+        Entry toRemove = null;
+
+        for(Short key : keySet()) {
+            for(PageId pid : mMap.get(key)) {
+                toRemove  = new Entry(key, pid);
+            }
+        }
+
+        if(toRemove != null) {
+            mMap.get(toRemove.getKey()).remove(toRemove.getValue());
+            if(mMap.get(toRemove.getKey()).isEmpty())
+                mMap.remove(toRemove.getKey());
+        }
+
+
+    }
+
+    public void remove(Short key, PageId value) {
+        mMap.get(key).remove(value);
+
+        if(mMap.get(key).isEmpty())
+            mMap.remove(key);
+    }
+
     /**
      * Returns <tt>true</tt> if this map maps one or more keys to the
      * specified value.  More formally, returns <tt>true</tt> if and only if
@@ -183,12 +208,7 @@ public class MultipleValueTreeMap implements Map<Short, PageId> {
      *                                       (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
      */
     public PageId remove(Object key) {
-        if(!containsKey(key)) return null;
-        ArrayList<PageId> array = mMap.get((Short)key);
-        array.remove(array.size()-1); //Remove the last item.
-        if(array.isEmpty())
-            mMap.remove(key);
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
