@@ -28,11 +28,11 @@ public class HeapFile implements GlobalConst {
   private HFPage hfpage;
   private PageId firstid;
 
-  String filename;
+  private String filename;
 
-  TreeMap<Short, LinkedList<RID>> directory;
+  private TreeMap<Short, LinkedList<RID>> directory;
 
-  long reccnt;
+  private int reccnt;
 
   public HeapFile(String name) throws Exception {
     // this is a map of pages not records
@@ -146,6 +146,7 @@ public class HeapFile implements GlobalConst {
       Minibase.BufferManager.flushPage(rec.pageno);
     }
 
+    reccnt += 1;
     return newRecord;
   }
 
@@ -176,7 +177,7 @@ public class HeapFile implements GlobalConst {
 
   //get number of records in the file
   public int getRecCnt() {
-    return 0;
+    return reccnt;
   }
 
   public HeapScan openScan() {
