@@ -57,6 +57,10 @@ public class MultipleValueTreeMap implements Map<Short, PageId> {
         return !(mMap.get(key) == null || mMap.get(key).isEmpty());
     }
 
+    public TreeMap<Short, ArrayList<PageId>> getTreeMap() {
+        return mMap;
+    }
+
     /**
      * Returns <tt>true</tt> if this map maps one or more keys to the
      * specified value.  More formally, returns <tt>true</tt> if and only if
@@ -182,6 +186,8 @@ public class MultipleValueTreeMap implements Map<Short, PageId> {
         if(!containsKey(key)) return null;
         ArrayList<PageId> array = mMap.get((Short)key);
         array.remove(array.size()-1); //Remove the last item.
+        if(array.isEmpty())
+            mMap.remove(key);
         return null;
     }
 
