@@ -28,14 +28,14 @@ public class HeapFile implements GlobalConst {
 
   private String filename;
 
-  private TreeMap<Short, ArrayList<PageId>> directory;
+  private MultipleValueTreeMap directory;
 
   private int reccnt;
 
   public HeapFile(String name) throws Exception {
     // this is a map of pages not records
     // <available_space, pageno>
-    directory = new TreeMap<Short, ArrayList<PageId>>();
+    directory = new MultipleValueTreeMap();
     this.filename = name;
     boolean exists = true;
 
@@ -77,7 +77,7 @@ public class HeapFile implements GlobalConst {
     //  is larger than record.length
     Short rlength = (short)record.length;
     HFPage curDataPage = new HFPage();
-    Short index = directory.higherKey(rlength);
+    Short index = directory.getTreeMap().higherKey(rlength);
 
     RID newRecord;
 
@@ -96,20 +96,19 @@ public class HeapFile implements GlobalConst {
       //System.out.println("pageno: " + newRecord.pageno.pid + "\tslotno: " + newRecord.slotno);
 
       // update the directory
-      ArrayList<PageId> arrayList = directory.get(newPage.getFreeSpace());
-      if(arrayList == null) {
-        arrayList = new ArrayList<PageId>();
-        arrayList.add(newPageId);
-        directory.put(newPage.getFreeSpace(), arrayList);
-      }
+      directory.put(newPage.getFreeSpace(), newPageId);
 
       Minibase.BufferManager.unpinPage(newPageId, true);
     }
     else {
       // we first select a page that definetly has more space than 
       HFPage currentPage = new HFPage();
-      PageId closestGuess = directory.get(index).get(0);
+      PageId closestGuess = directory.get(index);
       Minibase.BufferManager.pinPage(closestGuess, currentPage, false);
+
+      // update the directory
+      directory.remove(currentPage.getFreeSpace(), closestGuess);
+
       newRecord = currentPage.insertRecord(record);
 
       // debug print
@@ -121,19 +120,8 @@ public class HeapFile implements GlobalConst {
         throw new ChainException();
       }
 
-      // update the directory
-      directory.get(index).remove(closestGuess);
-      if(directory.get(index).isEmpty()) {
-        directory.remove(index);
-      }
-
       // System.out.println(directory.get(currentPage.getFreeSpace()));
-      ArrayList<PageId> arrayList = directory.get(currentPage.getFreeSpace());
-      if (arrayList == null) {
-        arrayList = new ArrayList<PageId>();
-        directory.put(currentPage.getFreeSpace(), arrayList);
-      }
-      directory.get(currentPage.getFreeSpace()).add(closestGuess);
+      directory.put(currentPage.getFreeSpace(), closestGuess);
 
       Minibase.BufferManager.unpinPage(closestGuess, true);
     }
@@ -164,8 +152,7 @@ public class HeapFile implements GlobalConst {
       Minibase.BufferManager.pinPage(rid.pageno, currentPage, false);
 
       // update the key value pair in the directory
-      short key = currentPage.getFreeSpace();
-      directory.get(key).remove(rid.pageno);
+      directory.remove(currentPage.getFreeSpace(), rid.pageno);
 
       if (newRecord.getLength() > currentPage.getFreeSpace() + getRecord(rid).getLength()) {
         deleteRecord(rid);
@@ -175,6 +162,8 @@ public class HeapFile implements GlobalConst {
         deleteRecord(rid);
         currentPage.insertRecord(newRecord.getTupleByteArray());
       }
+
+      directory.put(currentPage.getFreeSpace(), rid.pageno);
 
     } catch(Exception e){
       e.printStackTrace();
@@ -192,16 +181,11 @@ public class HeapFile implements GlobalConst {
       Minibase.BufferManager.pinPage(rid.pageno, currentPage, false);
 
       // update the key value pair in the directory
-      short key = currentPage.getFreeSpace();
-      directory.get(key).remove(rid.pageno);
+      directory.remove(currentPage.getFreeSpace(), rid.pageno);
 
       currentPage.deleteRecord(rid);
 
-      ArrayList<PageId> pages = directory.get(currentPage.getFreeSpace());
-      if (pages == null) {
-        pages = new ArrayList<PageId>();
-        pages.add(rid.pageno);
-      }
+      directory.put(currentPage.getFreeSpace(), rid.pageno);
 
     } catch(Exception e){
       e.printStackTrace();
