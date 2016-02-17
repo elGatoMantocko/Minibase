@@ -194,7 +194,7 @@ public class HeapFileTest {
       e.printStackTrace();
     }
 
-    assertEquals("Wrong amount of records inserted", f.getRecCnt(), 0);
+    assertEquals("Wrong amount of records inserted", 0, f.getRecCnt());
     
   }
 

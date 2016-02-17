@@ -7,10 +7,7 @@ import global.GlobalConst;
 import global.RID;
 import global.Convert;
 
-import java.util.TreeMap;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import chainexception.ChainException;
@@ -31,14 +28,14 @@ public class HeapFile implements GlobalConst {
 
   private String filename;
 
-  private TreeMap<Short, Integer> directory;
+  private MultipleValueTreeMap directory;
 
   private int reccnt;
 
   public HeapFile(String name) throws Exception {
     // this is a map of pages not records
     // <available_space, pageno>
-    directory = new TreeMap<Short, Integer>();
+    directory = new MultipleValueTreeMap();
     this.filename = name;
     boolean exists = true;
 
@@ -80,7 +77,7 @@ public class HeapFile implements GlobalConst {
     //  is larger than record.length
     Short rlength = (short)record.length;
     HFPage curDataPage = new HFPage();
-    Short index = directory.higherKey(rlength);
+    Short index = directory.getTreeMap().higherKey(rlength);
 
     RID newRecord;
 
@@ -99,15 +96,19 @@ public class HeapFile implements GlobalConst {
       //System.out.println("pageno: " + newRecord.pageno.pid + "\tslotno: " + newRecord.slotno);
 
       // update the directory
-      directory.put(newPage.getFreeSpace(), newPageId.pid);
+      directory.put(newPage.getFreeSpace(), newPageId);
 
       Minibase.BufferManager.unpinPage(newPageId, true);
     }
     else {
       // we first select a page that definetly has more space than 
       HFPage currentPage = new HFPage();
-      PageId closestGuess = new PageId(directory.get(index));
+      PageId closestGuess = directory.get(index);
       Minibase.BufferManager.pinPage(closestGuess, currentPage, false);
+
+      // update the directory
+      directory.remove(currentPage.getFreeSpace(), closestGuess);
+
       newRecord = currentPage.insertRecord(record);
 
       // debug print
@@ -119,9 +120,8 @@ public class HeapFile implements GlobalConst {
         throw new ChainException();
       }
 
-      // update the directory
-      directory.remove(index);
-      directory.put(currentPage.getFreeSpace(), closestGuess.pid);
+      // System.out.println(directory.get(currentPage.getFreeSpace()));
+      directory.put(currentPage.getFreeSpace(), closestGuess);
 
       Minibase.BufferManager.unpinPage(closestGuess, true);
     }
@@ -147,52 +147,55 @@ public class HeapFile implements GlobalConst {
   }
 
   public boolean updateRecord(RID rid, Tuple newRecord) throws ChainException {
-    Set<Map.Entry<Short, Integer>> entries = directory.entrySet();
     HFPage currentPage = new HFPage();
-    for (Map.Entry<Short, Integer> entry : entries) {
-      if (entry.getValue() == rid.pageno.pid) {
-        try {
-          Minibase.BufferManager.pinPage(rid.pageno, currentPage, false);
-          currentPage.updateRecord(rid, newRecord);
-          directory.remove(entry.getKey());
-          directory.put(currentPage.getFreeSpace(), rid.pageno.pid);
+    try {
+      Minibase.BufferManager.pinPage(rid.pageno, currentPage, false);
 
-          Minibase.BufferManager.unpinPage(rid.pageno, true);
-        } catch(Exception e){
-          e.printStackTrace();
-          throw new InvalidUpdateException();
-        }
-        
-        return true;
+      // update the key value pair in the directory
+      directory.remove(currentPage.getFreeSpace(), rid.pageno);
+
+      if (newRecord.getLength() > currentPage.getFreeSpace() + getRecord(rid).getLength()) {
+        deleteRecord(rid);
+        insertRecord(newRecord.getTupleByteArray());
       }
+      else {
+        deleteRecord(rid);
+        currentPage.insertRecord(newRecord.getTupleByteArray());
+      }
+
+      directory.put(currentPage.getFreeSpace(), rid.pageno);
+
+    } catch(Exception e){
+      e.printStackTrace();
+      throw new InvalidUpdateException();
+    } finally {
+      Minibase.BufferManager.unpinPage(rid.pageno, true);
     }
 
-    return false;
+    return true;
   }
 
   public boolean deleteRecord(RID rid) throws ChainException {
-    Set<Map.Entry<Short, Integer>> entries = directory.entrySet();
     HFPage currentPage = new HFPage();
-    for (Map.Entry<Short, Integer> entry : entries) {
-      if (entry.getValue() == rid.pageno.pid) {
-        try {
-          Minibase.BufferManager.pinPage(rid.pageno, currentPage, false);
-          currentPage.deleteRecord(rid);
-          directory.remove(entry.getKey());
-          directory.put(currentPage.getFreeSpace(), rid.pageno.pid);
+    try {
+      Minibase.BufferManager.pinPage(rid.pageno, currentPage, false);
 
-          Minibase.BufferManager.unpinPage(rid.pageno, true);
-        } catch(Exception e){
-          e.printStackTrace();
-          throw new InvalidUpdateException();
-        }
-        
-        reccnt -=1;
-        return true;
-      }
+      // update the key value pair in the directory
+      directory.remove(currentPage.getFreeSpace(), rid.pageno);
+
+      currentPage.deleteRecord(rid);
+
+      directory.put(currentPage.getFreeSpace(), rid.pageno);
+
+    } catch(Exception e){
+      e.printStackTrace();
+      throw new InvalidUpdateException();
+    } finally {
+      Minibase.BufferManager.unpinPage(rid.pageno, true);
     }
-
-    return false;
+  
+    reccnt -= 1;
+    return true;
   }
 
   //get number of records in the file
@@ -201,8 +204,7 @@ public class HeapFile implements GlobalConst {
   }
 
   public HeapScan openScan() {
-    //return new HeapScan(firstid, this);
-    return null;
+    return new HeapScan(this);
   }
 }
 
