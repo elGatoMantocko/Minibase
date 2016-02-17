@@ -99,9 +99,9 @@ public class HeapFile implements GlobalConst {
       ArrayList<PageId> arrayList = directory.get(newPage.getFreeSpace());
       if(arrayList == null) {
         arrayList = new ArrayList<PageId>();
+        arrayList.add(newPageId);
         directory.put(newPage.getFreeSpace(), arrayList);
       }
-      arrayList.add(newPageId);
 
       Minibase.BufferManager.unpinPage(newPageId, true);
     }
@@ -125,6 +125,13 @@ public class HeapFile implements GlobalConst {
       directory.get(index).remove(closestGuess);
       if(directory.get(index).isEmpty()) {
         directory.remove(index);
+      }
+
+      // System.out.println(directory.get(currentPage.getFreeSpace()));
+      ArrayList<PageId> arrayList = directory.get(currentPage.getFreeSpace());
+      if (arrayList == null) {
+        arrayList = new ArrayList<PageId>();
+        directory.put(currentPage.getFreeSpace(), arrayList);
       }
       directory.get(currentPage.getFreeSpace()).add(closestGuess);
 
@@ -190,7 +197,11 @@ public class HeapFile implements GlobalConst {
 
       currentPage.deleteRecord(rid);
 
-      directory.get(currentPage.getFreeSpace()).add(rid.pageno);
+      ArrayList<PageId> pages = directory.get(currentPage.getFreeSpace());
+      if (pages == null) {
+        pages = new ArrayList<PageId>();
+        pages.add(rid.pageno);
+      }
 
     } catch(Exception e){
       e.printStackTrace();
@@ -199,6 +210,7 @@ public class HeapFile implements GlobalConst {
       Minibase.BufferManager.unpinPage(rid.pageno, true);
     }
   
+    reccnt -= 1;
     return true;
   }
 
