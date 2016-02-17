@@ -9,6 +9,9 @@ import global.Convert;
 
 import java.util.TreeMap;
 import java.util.Comparator;
+import java.util.Set;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import chainexception.ChainException;
 import com.sun.net.httpserver.Filter;
@@ -98,7 +101,6 @@ public class HeapFile implements GlobalConst {
       directory.put(newPage.getFreeSpace(), newPageId.pid);
 
       Minibase.BufferManager.unpinPage(newPageId, true);
-      Minibase.BufferManager.flushPage(newPageId);
     }
     else {
       // we first select a page that definetly has more space than 
@@ -121,7 +123,6 @@ public class HeapFile implements GlobalConst {
       directory.put(currentPage.getFreeSpace(), closestGuess.pid);
 
       Minibase.BufferManager.unpinPage(closestGuess, true);
-      Minibase.BufferManager.flushPage(closestGuess);
     }
 
     reccnt += 1;
@@ -150,7 +151,26 @@ public class HeapFile implements GlobalConst {
   }
 
   public boolean deleteRecord(RID rid) {
-    reccnt -=1;
+    Set<Map.Entry<Short, Integer>> entries = directory.entrySet();
+    HFPage currentPage = new HFPage();
+    for (Map.Entry<Short, Integer> entry : entries) {
+      if (entry.getValue() == rid.pageno.pid) {
+        try {
+          Minibase.BufferManager.pinPage(rid.pageno, currentPage, false);
+          currentPage.deleteRecord(rid);
+          directory.remove(entry.getKey());
+          directory.put(currentPage.getFreeSpace(), rid.pageno.pid);
+
+          Minibase.BufferManager.unpinPage(rid.pageno, true);
+        } catch(Exception e){
+          e.printStackTrace();
+        }
+        
+        reccnt -=1;
+        return true;
+      }
+    }
+
     return false;
   }
 
