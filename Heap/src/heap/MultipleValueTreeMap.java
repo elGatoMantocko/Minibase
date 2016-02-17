@@ -284,7 +284,7 @@ public class MultipleValueTreeMap implements Map<Short, PageId> {
      * @return a collection view of the values contained in this map
      */
     public Collection<PageId> values() {
-        ArrayList<PageId> values = new ArrayList<PageId>();
+        Set<PageId> values = new HashSet<PageId>();
         for(Set<PageId> pages : mMap.values()) {
             values.addAll(pages);
         }
