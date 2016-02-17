@@ -7,10 +7,7 @@ import global.GlobalConst;
 import global.RID;
 import global.Convert;
 
-import java.util.TreeMap;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import chainexception.ChainException;
@@ -31,14 +28,14 @@ public class HeapFile implements GlobalConst {
 
   private String filename;
 
-  private TreeMap<Short, Integer> directory;
+  private TreeMap<Short, ArrayList<PageId>> directory;
 
   private int reccnt;
 
   public HeapFile(String name) throws Exception {
     // this is a map of pages not records
     // <available_space, pageno>
-    directory = new TreeMap<Short, Integer>();
+    directory = new TreeMap<Short, ArrayList<PageId>>();
     this.filename = name;
     boolean exists = true;
 
@@ -99,14 +96,19 @@ public class HeapFile implements GlobalConst {
       //System.out.println("pageno: " + newRecord.pageno.pid + "\tslotno: " + newRecord.slotno);
 
       // update the directory
-      directory.put(newPage.getFreeSpace(), newPageId.pid);
+      ArrayList<PageId> arrayList = directory.get(newPage.getFreeSpace());
+      if(arrayList == null) {
+        arrayList = new ArrayList<PageId>();
+        directory.put(newPage.getFreeSpace(), arrayList);
+      }
+      arrayList.add(newPageId);
 
       Minibase.BufferManager.unpinPage(newPageId, true);
     }
     else {
       // we first select a page that definetly has more space than 
       HFPage currentPage = new HFPage();
-      PageId closestGuess = new PageId(directory.get(index));
+      PageId closestGuess = directory.get(index).get(0);
       Minibase.BufferManager.pinPage(closestGuess, currentPage, false);
       newRecord = currentPage.insertRecord(record);
 
@@ -120,8 +122,11 @@ public class HeapFile implements GlobalConst {
       }
 
       // update the directory
-      directory.remove(index);
-      directory.put(currentPage.getFreeSpace(), closestGuess.pid);
+      directory.get(index).remove(closestGuess);
+      if(directory.get(index).isEmpty()) {
+        directory.remove(index);
+      }
+      directory.get(currentPage.getFreeSpace()).add(closestGuess);
 
       Minibase.BufferManager.unpinPage(closestGuess, true);
     }
@@ -147,52 +152,11 @@ public class HeapFile implements GlobalConst {
   }
 
   public boolean updateRecord(RID rid, Tuple newRecord) throws ChainException {
-    Set<Map.Entry<Short, Integer>> entries = directory.entrySet();
-    HFPage currentPage = new HFPage();
-    for (Map.Entry<Short, Integer> entry : entries) {
-      if (entry.getValue() == rid.pageno.pid) {
-        try {
-          Minibase.BufferManager.pinPage(rid.pageno, currentPage, false);
-          currentPage.updateRecord(rid, newRecord);
-          directory.remove(entry.getKey());
-          directory.put(currentPage.getFreeSpace(), rid.pageno.pid);
-
-          Minibase.BufferManager.unpinPage(rid.pageno, true);
-        } catch(Exception e){
-          e.printStackTrace();
-          throw new InvalidUpdateException();
-        }
-        
-        return true;
-      }
-    }
-
-    return false;
+    //Voided
   }
 
   public boolean deleteRecord(RID rid) throws ChainException {
-    Set<Map.Entry<Short, Integer>> entries = directory.entrySet();
-    HFPage currentPage = new HFPage();
-    for (Map.Entry<Short, Integer> entry : entries) {
-      if (entry.getValue() == rid.pageno.pid) {
-        try {
-          Minibase.BufferManager.pinPage(rid.pageno, currentPage, false);
-          currentPage.deleteRecord(rid);
-          directory.remove(entry.getKey());
-          directory.put(currentPage.getFreeSpace(), rid.pageno.pid);
-
-          Minibase.BufferManager.unpinPage(rid.pageno, true);
-        } catch(Exception e){
-          e.printStackTrace();
-          throw new InvalidUpdateException();
-        }
-        
-        reccnt -=1;
-        return true;
-      }
-    }
-
-    return false;
+    //voided
   }
 
   //get number of records in the file
@@ -201,8 +165,7 @@ public class HeapFile implements GlobalConst {
   }
 
   public HeapScan openScan() {
-    //return new HeapScan(firstid, this);
-    return null;
+    return new HeapScan(this);
   }
 }
 
