@@ -9,6 +9,8 @@ import global.Convert;
 
 import java.util.TreeMap;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.Iterator;
 
 import chainexception.ChainException;
 import com.sun.net.httpserver.Filter;
@@ -28,12 +30,14 @@ public class HeapFile implements GlobalConst {
 
   String filename;
 
-  TreeMap<Short, Integer> directory;
+  TreeMap<Short, LinkedList<RID>> directory;
+
+  long reccnt;
 
   public HeapFile(String name) throws Exception {
     // this is a map of pages not records
     // <available_space, pageno>
-    directory = new TreeMap<Short, Integer>();
+    directory = new TreeMap<Short, LinkedList<RID>>();
     this.filename = name;
     boolean exists = true;
 
@@ -54,9 +58,10 @@ public class HeapFile implements GlobalConst {
           hfp.setPrevPage(badPID);
 
           Minibase.BufferManager.unpinPage(firstid, true);
+          Minibase.BufferManager.flushPage(firstid);
         }
         else {
-          Minibase.BufferManager.unpinPage(firstid, true);
+          Minibase.BufferManager.unpinPage(firstid, false);
         }
       } catch(Exception e){
         e.printStackTrace();
@@ -76,6 +81,8 @@ public class HeapFile implements GlobalConst {
     HFPage curDataPage = new HFPage();
     Short index = directory.higherKey(rlength);
 
+    LinkedList<RID> recordlist;
+
     RID newRecord;
 
     // we couldn't find a suitable page!
@@ -93,7 +100,16 @@ public class HeapFile implements GlobalConst {
       //System.out.println("pageno: " + newRecord.pageno.pid + "\tslotno: " + newRecord.slotno);
 
       // update the directory
-      directory.put(newPage.getFreeSpace(), newPageId.pid);
+      recordlist = directory.get(newPage.getFreeSpace());
+
+      // initialize the recordlist if it hasn't been yet
+      if (recordlist == null) {
+        recordlist = new LinkedList<RID>();
+      }
+      
+      // add the record to the list and update the directory
+      recordlist.offer(newRecord);
+      directory.put(newPage.getFreeSpace(), recordlist);
 
       Minibase.BufferManager.unpinPage(newPageId, true);
       Minibase.BufferManager.flushPage(newPageId);
@@ -101,8 +117,16 @@ public class HeapFile implements GlobalConst {
     else {
       // we first select a page that definetly has more space than 
       HFPage currentPage = new HFPage();
-      PageId closestGuess = new PageId(directory.get(index));
-      Minibase.BufferManager.pinPage(closestGuess, currentPage, false);
+      recordlist = directory.get(index);
+
+      // Instead of iterating over the list of records we just peek
+      // onto the first element
+      //     if for some reason it fails and there isn't an availabe slot then we can go to the next one
+      //     else we just make a new page
+
+      RID rec = recordlist.peek();
+
+      Minibase.BufferManager.pinPage(rec.pageno, currentPage, false);
       newRecord = currentPage.insertRecord(record);
 
       // debug print
@@ -111,15 +135,15 @@ public class HeapFile implements GlobalConst {
       // there wasn't enough free space in this page
       //  for some stupid reason
       if (newRecord == null) {
+        // this is bad so we have to add the record back to the list
         throw new ChainException();
       }
 
-      // update the directory
       directory.remove(index);
-      directory.put(currentPage.getFreeSpace(), closestGuess.pid);
+      directory.put(currentPage.getFreeSpace(), recordlist);
 
-      Minibase.BufferManager.unpinPage(closestGuess, true);
-      Minibase.BufferManager.flushPage(closestGuess);
+      Minibase.BufferManager.unpinPage(rec.pageno, true);
+      Minibase.BufferManager.flushPage(rec.pageno);
     }
 
     return newRecord;
