@@ -65,6 +65,7 @@ public class HeapFile implements GlobalConst {
         }
       } catch(Exception e){
         e.printStackTrace();
+        throw new InvalidUpdateException();
       }
     }
   }
@@ -129,7 +130,7 @@ public class HeapFile implements GlobalConst {
     return newRecord;
   }
 
-  public Tuple getRecord(RID rid) {
+  public Tuple getRecord(RID rid) throws ChainException {
     PageId pid = rid.pageno;
     HFPage page = new HFPage();
 
@@ -141,9 +142,8 @@ public class HeapFile implements GlobalConst {
       return t;
     } catch(Exception e){
       e.printStackTrace();
+      throw new InvalidUpdateException();
     }
-    
-    return null;
   }
 
   public boolean updateRecord(RID rid, Tuple newRecord) throws ChainException {
@@ -160,6 +160,7 @@ public class HeapFile implements GlobalConst {
           Minibase.BufferManager.unpinPage(rid.pageno, true);
         } catch(Exception e){
           e.printStackTrace();
+          throw new InvalidUpdateException();
         }
         
         return true;
@@ -169,7 +170,7 @@ public class HeapFile implements GlobalConst {
     return false;
   }
 
-  public boolean deleteRecord(RID rid) {
+  public boolean deleteRecord(RID rid) throws ChainException {
     Set<Map.Entry<Short, Integer>> entries = directory.entrySet();
     HFPage currentPage = new HFPage();
     for (Map.Entry<Short, Integer> entry : entries) {
@@ -183,6 +184,7 @@ public class HeapFile implements GlobalConst {
           Minibase.BufferManager.unpinPage(rid.pageno, true);
         } catch(Exception e){
           e.printStackTrace();
+          throw new InvalidUpdateException();
         }
         
         reccnt -=1;
