@@ -11,6 +11,7 @@ import heap.HeapScan;
 import heap.Tuple;
 
 import java.io.IOException;
+import java.lang.IllegalArgumentException;
 
 import chainexception.ChainException;
 import org.junit.Ignore;
@@ -152,7 +153,72 @@ public class HeapFileTest {
 
   @Test
   public void testUpdateRecord() {
+    try {
+      f = new HeapFile("file_1");
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    DummyRecord rec = new DummyRecord(REC_LEN);
+    rec.ival = 0;
+    rec.fval = (float) (0 * 2.5);
+    rec.name = "record" + 0;
+
+    try {
+      f.insertRecord(rec.toByteArray());
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    assertEquals("Wrong amount of records inserted", f.getRecCnt(), 1);
+  }
+
+  @Test
+  public void testDeleteRecord() {
+    try {
+      f = new HeapFile("file_1");
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    DummyRecord rec = new DummyRecord(REC_LEN);
+    rec.ival = 0;
+    rec.fval = (float) (0 * 2.5);
+    rec.name = "record" + 0;
+
+    try {
+      RID newrec = f.insertRecord(rec.toByteArray());
+      f.deleteRecord(newrec);
+
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    assertEquals("Wrong amount of records inserted", f.getRecCnt(), 0);
     
+  }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testNoRecordFound() throws IllegalArgumentException, ChainException, IOException {
+    try {
+      f = new HeapFile("file_1");
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    DummyRecord rec = new DummyRecord(REC_LEN);
+    rec.ival = 0;
+    rec.fval = (float) (0 * 2.5);
+    rec.name = "record" + 0;
+
+    RID newrec = f.insertRecord(rec.toByteArray());
+    //System.out.println("pageno: " + newrec.pageno.pid + "\tslotno: " + newrec.slotno);
+    HFPage curPage = new HFPage();
+    Minibase.BufferManager.pinPage(newrec.pageno, curPage, false);
+
+    f.deleteRecord(newrec);
+
+    assertArrayEquals("The tuple returned should be empty", new byte[0], curPage.selectRecord(newrec));
   }
 
   @Test @Ignore
