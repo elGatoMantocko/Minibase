@@ -71,7 +71,8 @@ public class HeapFileTest {
 
       try {
         RID rid = f.insertRecord(rec.toByteArray());
-        assertEquals(rec.toByteArray(), f.getRecord(rid).getTupleByteArray());
+        System.out.println("pageno: " + rid.pageno.pid + "\tslotno: " + rid.slotno);
+        assertArrayEquals(rec.toByteArray(), f.getRecord(rid).getTupleByteArray());
       } catch(Exception e){
         e.printStackTrace();
         fail();
