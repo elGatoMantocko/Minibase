@@ -9,10 +9,10 @@ import java.util.*;
  */
 public class MultipleValueTreeMap implements Map<Short, PageId> {
 
-    TreeMap<Short, ArrayList<PageId>> mMap;
+    TreeMap<Short, Set<PageId>> mMap;
 
     public MultipleValueTreeMap() {
-        mMap = new TreeMap<Short, ArrayList<PageId>>();
+        mMap = new TreeMap<Short, Set<PageId>>();
     }
     /**
      * Returns the number of key-value mappings in this map.  If the
@@ -57,7 +57,7 @@ public class MultipleValueTreeMap implements Map<Short, PageId> {
         return !(mMap.get(key) == null || mMap.get(key).isEmpty());
     }
 
-    public TreeMap<Short, ArrayList<PageId>> getTreeMap() {
+    public TreeMap<Short, Set<PageId>> getTreeMap() {
         return mMap;
     }
 
@@ -75,8 +75,6 @@ public class MultipleValueTreeMap implements Map<Short, PageId> {
             if(mMap.get(toRemove.getKey()).isEmpty())
                 mMap.remove(toRemove.getKey());
         }
-
-
     }
 
     public void remove(Short key, PageId value) {
@@ -140,7 +138,7 @@ public class MultipleValueTreeMap implements Map<Short, PageId> {
      */
     public PageId get(Object key) {
         if(!containsKey(key)) return null;
-        return mMap.get(key).get(0);
+        return mMap.get(key).iterator().next();
     }
 
     /**
@@ -168,9 +166,9 @@ public class MultipleValueTreeMap implements Map<Short, PageId> {
      *                                       or value prevents it from being stored in this map
      */
     public PageId put(Short key, PageId value) {
-        ArrayList<PageId> array = mMap.get(key);
+        Set<PageId> array = mMap.get(key);
         if(array == null) {
-            array = new ArrayList<PageId>();
+            array = new HashSet<PageId>();
             mMap.put(key, array);
         }
         array.add(value);
@@ -287,7 +285,7 @@ public class MultipleValueTreeMap implements Map<Short, PageId> {
      */
     public Collection<PageId> values() {
         ArrayList<PageId> values = new ArrayList<PageId>();
-        for(ArrayList<PageId> pages : mMap.values()) {
+        for(Set<PageId> pages : mMap.values()) {
             values.addAll(pages);
         }
         return values;
