@@ -55,7 +55,7 @@ public class HeapFileTest {
 
   // I think this should be a strong test?
   @Test
-  public void testOneDataPage() {
+  public void testOneHundredRecords() {
 
     try {
       f = new HeapFile("file_1");
@@ -71,7 +71,6 @@ public class HeapFileTest {
 
       try {
         RID rid = f.insertRecord(rec.toByteArray());
-        System.out.println("pageno: " + rid.pageno.pid + "\tslotno: " + rid.slotno);
         assertArrayEquals(rec.toByteArray(), f.getRecord(rid).getTupleByteArray());
       } catch(Exception e){
         e.printStackTrace();
@@ -80,8 +79,8 @@ public class HeapFileTest {
     }
   }
 
-  @Test @Ignore
-  public void testOneDirectoryPage() {
+  @Test
+  public void testTwoThousandRecords() {
 
     try {
       f = new HeapFile("file_1");
@@ -97,6 +96,7 @@ public class HeapFileTest {
 
       try {
         RID rid = f.insertRecord(rec.toByteArray());
+        assertArrayEquals(rec.toByteArray(), f.getRecord(rid).getTupleByteArray());
       } catch(Exception e){
         e.printStackTrace();
         fail();

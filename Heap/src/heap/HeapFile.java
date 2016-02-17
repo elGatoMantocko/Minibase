@@ -74,7 +74,7 @@ public class HeapFile implements GlobalConst {
     //  is larger than record.length
     Short rlength = (short)record.length;
     HFPage curDataPage = new HFPage();
-    Short index = directory.ceilingKey(rlength);
+    Short index = directory.higherKey(rlength);
 
     RID newRecord;
 
@@ -84,19 +84,29 @@ public class HeapFile implements GlobalConst {
       //  make sure not to forget to add the page into directory
       HFPage newPage = new HFPage();
       PageId newPageId = Minibase.BufferManager.newPage(newPage, 1);
+      newPage.setCurPage(newPageId);
+      newPage.setPrevPage(new PageId(INVALID_PAGEID));
+      newPage.setNextPage(new PageId(INVALID_PAGEID));
       newRecord = newPage.insertRecord(record);
-      newPage.print();
+
+      // debug print
+      //System.out.println("pageno: " + newRecord.pageno.pid + "\tslotno: " + newRecord.slotno);
+
+      // update the directory
       directory.put(newPage.getFreeSpace(), newPageId.pid);
 
       Minibase.BufferManager.unpinPage(newPageId, true);
+      Minibase.BufferManager.flushPage(newPageId);
     }
     else {
       // we first select a page that definetly has more space than 
       HFPage currentPage = new HFPage();
       PageId closestGuess = new PageId(directory.get(index));
       Minibase.BufferManager.pinPage(closestGuess, currentPage, false);
-      currentPage.print();
       newRecord = currentPage.insertRecord(record);
+
+      // debug print
+      // System.out.println("pageno: " + newRecord.pageno.pid + "\tslotno: " + newRecord.slotno);
 
       // there wasn't enough free space in this page
       //  for some stupid reason
@@ -104,8 +114,12 @@ public class HeapFile implements GlobalConst {
         throw new ChainException();
       }
 
+      // update the directory
+      directory.remove(index);
+      directory.put(currentPage.getFreeSpace(), closestGuess.pid);
 
       Minibase.BufferManager.unpinPage(closestGuess, true);
+      Minibase.BufferManager.flushPage(closestGuess);
     }
 
     return newRecord;
@@ -116,7 +130,7 @@ public class HeapFile implements GlobalConst {
     HFPage page = new HFPage();
 
     try {
-      Minibase.BufferManager.pinPage(pid, page, true);
+      Minibase.BufferManager.pinPage(pid, page, false);
       byte[] rec = page.selectRecord(rid);
       Tuple t = new Tuple(rec, 0, rec.length);
       Minibase.BufferManager.unpinPage(pid, false);
