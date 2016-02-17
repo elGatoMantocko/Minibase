@@ -147,6 +147,25 @@ public class HeapFile implements GlobalConst {
   }
 
   public boolean updateRecord(RID rid, Tuple newRecord) throws ChainException {
+    Set<Map.Entry<Short, Integer>> entries = directory.entrySet();
+    HFPage currentPage = new HFPage();
+    for (Map.Entry<Short, Integer> entry : entries) {
+      if (entry.getValue() == rid.pageno.pid) {
+        try {
+          Minibase.BufferManager.pinPage(rid.pageno, currentPage, false);
+          currentPage.updateRecord(rid, newRecord);
+          directory.remove(entry.getKey());
+          directory.put(currentPage.getFreeSpace(), rid.pageno.pid);
+
+          Minibase.BufferManager.unpinPage(rid.pageno, true);
+        } catch(Exception e){
+          e.printStackTrace();
+        }
+        
+        return true;
+      }
+    }
+
     return false;
   }
 
