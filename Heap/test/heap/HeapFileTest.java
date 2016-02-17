@@ -54,7 +54,7 @@ public class HeapFileTest {
   }
 
   // I think this should be a strong test?
-  @Test @Ignore
+  @Test
   public void testOneDataPage() {
 
     try {

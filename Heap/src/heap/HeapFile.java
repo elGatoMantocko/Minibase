@@ -5,6 +5,10 @@ import global.PageId;
 import global.Page;
 import global.GlobalConst;
 import global.RID;
+import global.Convert;
+
+import java.util.TreeMap;
+import java.util.Comparator;
 
 import chainexception.ChainException;
 import com.sun.net.httpserver.Filter;
@@ -21,9 +25,15 @@ import com.sun.net.httpserver.Filter;
 public class HeapFile implements GlobalConst {
   private HFPage hfpage;
   private PageId firstid;
+
   String filename;
 
+  TreeMap<Short, Integer> directory;
+
   public HeapFile(String name) throws Exception {
+    // this is a map of pages not records
+    // <available_space, pageno>
+    directory = new TreeMap<Short, Integer>();
     this.filename = name;
     boolean exists = true;
 
@@ -55,51 +65,66 @@ public class HeapFile implements GlobalConst {
   }
 
   public RID insertRecord(byte[] record) throws ChainException {
-    boolean found;
-    int rlength = record.length;
 
-    HFPage curDirPage = new HFPage();
-    PageId curDirPid = new PageId(firstid.pid);
-
-    HFPage curDataPage = new HFPage();
-    Minibase.BufferManager.pinPage(curDirPid, curDirPage, false);
-
-    found = false;
-    Tuple tup;
-
-    // find space for the record
-    // while we haven't guaranteed a slot for the record
-    while (!found) {
-      // loop over the records in the current data page
-      for (RID curDataPageRID = curDirPage.firstRecord(); 
-          curDataPageRID != null; 
-          curDataPageRID = curDirPage.nextRecord(curDataPageRID)) {
-        //
-        tup = new Tuple(curDirPage.selectRecord(curDataPageRID), 0, rlength);
-        if (rlength <= curDataPage.getFreeSpace()) {
-          found = true;
-          break;
-        }
-      }
-
-      // how to handle changing the curDataPage and/or curDirPage
-      if (!found) {
-        
-      }
-      else {
-
-      }
+    if (record.length > PAGE_SIZE) {
+      throw new ChainException();
     }
 
-    RID rid;
-    rid = curDataPage.insertRecord(record);
+    // find the smallest key in directory that 
+    //  is larger than record.length
+    Short rlength = (short)record.length;
+    HFPage curDataPage = new HFPage();
+    Short index = directory.ceilingKey(rlength);
 
-    Minibase.BufferManager.unpinPage(curDirPid, true);
+    RID newRecord;
 
-    return rid;
+    // we couldn't find a suitable page!
+    if (index == null) {
+      // so now we need to make one and insert it into the db
+      //  make sure not to forget to add the page into directory
+      HFPage newPage = new HFPage();
+      PageId newPageId = Minibase.BufferManager.newPage(newPage, 1);
+      newRecord = newPage.insertRecord(record);
+      newPage.print();
+      directory.put(newPage.getFreeSpace(), newPageId.pid);
+
+      Minibase.BufferManager.unpinPage(newPageId, true);
+    }
+    else {
+      // we first select a page that definetly has more space than 
+      HFPage currentPage = new HFPage();
+      PageId closestGuess = new PageId(directory.get(index));
+      Minibase.BufferManager.pinPage(closestGuess, currentPage, false);
+      currentPage.print();
+      newRecord = currentPage.insertRecord(record);
+
+      // there wasn't enough free space in this page
+      //  for some stupid reason
+      if (newRecord == null) {
+        throw new ChainException();
+      }
+
+
+      Minibase.BufferManager.unpinPage(closestGuess, true);
+    }
+
+    return newRecord;
   }
 
   public Tuple getRecord(RID rid) {
+    PageId pid = rid.pageno;
+    HFPage page = new HFPage();
+
+    try {
+      Minibase.BufferManager.pinPage(pid, page, true);
+      byte[] rec = page.selectRecord(rid);
+      Tuple t = new Tuple(rec, 0, rec.length);
+      Minibase.BufferManager.unpinPage(pid, false);
+      return t;
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+    
     return null;
   }
 
@@ -117,6 +142,8 @@ public class HeapFile implements GlobalConst {
   }
 
   public HeapScan openScan() {
+    //return new HeapScan(firstid, this);
     return null;
   }
 }
+
