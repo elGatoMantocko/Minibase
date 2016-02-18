@@ -206,5 +206,9 @@ public class HeapFile implements GlobalConst {
   public HeapScan openScan() {
     return new HeapScan(this);
   }
+
+  public MultipleValueTreeMap getDirectory() {
+    return directory;
+  }
 }
 
