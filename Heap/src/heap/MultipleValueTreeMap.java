@@ -1,5 +1,6 @@
 package heap;
 
+import global.Page;
 import global.PageId;
 
 import java.util.*;
@@ -7,13 +8,33 @@ import java.util.*;
 /**
  * Created by david on 2/17/16.
  */
-public class MultipleValueTreeMap implements Map<Short, PageId> {
+public class MultipleValueTreeMap extends Page implements Map<Short, PageId> {
 
     TreeMap<Short, Set<PageId>> mMap;
 
     public MultipleValueTreeMap() {
+        init();
+    }
+
+    public MultipleValueTreeMap(Page p) {
+        super(p.getData());
+        init();
+        readMapFromBytes(p.getData());
+    }
+
+    private void readMapFromBytes(byte[] data) {
+
+    }
+
+    @Override
+    public byte[] getData() {
+        return super.getData();
+    }
+
+    private void init() {
         mMap = new TreeMap<Short, Set<PageId>>();
     }
+
     /**
      * Returns the number of key-value mappings in this map.  If the
      * map contains more than <tt>Integer.MAX_VALUE</tt> elements, returns
