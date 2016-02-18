@@ -7,7 +7,7 @@ JAVAC = $(JDKPATH)/bin/javac
 JAVA  = $(JDKPATH)/bin/java 
 
 TEST_DIR=./test
-TEST_NAMES=tests.HFDriverTest heap.HeapFileTest heap.TupleTest
+TEST_NAMES=tests.HFDriverTest heap.HeapFileTest heap.TupleTest tests.ProvidedTests
 TEST_SOURCES=./test/tests/*.java ./test/heap/*.java
 
 PROGS = xx
