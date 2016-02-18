@@ -5,25 +5,13 @@ import global.PageId;
 import global.Page;
 import global.GlobalConst;
 import global.RID;
-import global.Convert;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 import chainexception.ChainException;
-import com.sun.net.httpserver.Filter;
-
-/**
- * Created by david on 2/5/16.
- */
 
 /**
  * Create a new HeapFile opject
- *  
- * @exception IOException 
  **/
 public class HeapFile implements GlobalConst {
-  private HFPage hfpage;
   private PageId firstid;
 
   private String filename;
