@@ -12,9 +12,6 @@ import chainexception.ChainException;
  * Create a new HeapFile opject
  **/
 public class HeapFile implements GlobalConst {
-  private PageId firstid;
-
-  private String filename;
 
   private MultipleValueTreeMap directory;
 
@@ -24,17 +21,16 @@ public class HeapFile implements GlobalConst {
     // this is a map of pages not records
     // <available_space, pageno>
     directory = new MultipleValueTreeMap();
-    this.filename = name;
     boolean exists = true;
 
     if (name != null) {
       Page p = new Page();
 
       try {
-        firstid = Minibase.DiskManager.get_file_entry(name);
+        PageId firstid = Minibase.DiskManager.get_file_entry(name);
         if (firstid == null) {
           firstid = Minibase.BufferManager.newPage(p, 1);
-          Minibase.DiskManager.add_file_entry(filename, firstid);
+          Minibase.DiskManager.add_file_entry(name, firstid);
 
           HFPage hfp = new HFPage(p);
           hfp.setCurPage(firstid);
@@ -64,7 +60,6 @@ public class HeapFile implements GlobalConst {
     // find the smallest key in directory that 
     //  is larger than record.length
     Short rlength = (short)record.length;
-    HFPage curDataPage = new HFPage();
     Short index = directory.getTreeMap().higherKey(rlength);
 
     RID newRecord;
