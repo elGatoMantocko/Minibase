@@ -17,19 +17,20 @@ public class HeapScan implements GlobalConst {
     Iterator<PageId> mPagesItr;
     RID mCurrentRecord;
 
+    PageId mFirstPage;
+
     protected HeapScan(HeapFile hf) {
         mHeapFile = hf;
         mPagesItr = hf.getDirectory().values().iterator();
 
         HFPage page = new HFPage();
-        PageId pid = mPagesItr.next();
-        Minibase.BufferManager.pinPage(pid, page, false);
+        mFirstPage = mPagesItr.next();
+        Minibase.BufferManager.pinPage(mFirstPage, page, false);
         mCurrentRecord = page.firstRecord();
-        Minibase.BufferManager.unpinPage(pid, false);
     }
 
     public void close() throws ChainException {
-
+        Minibase.BufferManager.unpinPage(mFirstPage, false);
     }
 
     public Tuple getNext(RID rid) {
@@ -38,11 +39,13 @@ public class HeapScan implements GlobalConst {
             HFPage page = new HFPage();
             Minibase.BufferManager.pinPage(mCurrentRecord.pageno, page, false);
             if(page.hasNext(mCurrentRecord)) {
-                RID nextRecord = page.nextRecord(mCurrentRecord);
-                rid.copyRID(nextRecord);
-                Minibase.BufferManager.pinPage(mCurrentRecord.pageno, page, false);
 
-                return new Tuple(page.selectRecord(nextRecord), 0, nextRecord.getLength());
+                rid.copyRID(mCurrentRecord);
+                int length = page.selectRecord(mCurrentRecord).length;
+                Tuple t = new Tuple(page.selectRecord(mCurrentRecord), 0, length);
+
+                mCurrentRecord = page.nextRecord(mCurrentRecord);
+                return t;
             } else {
                 Minibase.BufferManager.unpinPage(mCurrentRecord.pageno, false);
 
