@@ -1,5 +1,6 @@
 package heap;
 
+import global.Minibase;
 import global.Page;
 import global.PageId;
 
@@ -12,18 +13,15 @@ public class MultipleValueTreeMap extends Page implements Map<Short, PageId> {
 
     TreeMap<Short, Set<PageId>> mMap;
 
-    public MultipleValueTreeMap() {
+    public MultipleValueTreeMap(String filename) {
+        PageId file_entry = Minibase.DiskManager.get_file_entry(filename);
         init();
-    }
+        Page p = new Page();
+        Minibase.BufferManager.pinPage(file_entry, p, false);
 
-    public MultipleValueTreeMap(Page p) {
-        super(p.getData());
-        init();
-        readMapFromBytes(p.getData());
     }
 
     private void readMapFromBytes(byte[] data) {
-
     }
 
     @Override
