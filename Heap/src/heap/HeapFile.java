@@ -57,9 +57,6 @@ public class HeapFile implements GlobalConst {
 
           Minibase.BufferManager.unpinPage(firstid, true);
         }
-        else {
-          Minibase.BufferManager.unpinPage(firstid, true);
-        }
       } catch(Exception e){
         e.printStackTrace();
         throw new InvalidUpdateException();
