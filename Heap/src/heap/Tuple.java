@@ -8,21 +8,21 @@ import global.GlobalConst;
  */
 public class Tuple implements GlobalConst {
   private int length;
-  private byte[] tupleByteArray;
+  protected byte[] data;
 
   public Tuple(byte[] byteArray, int from, int to) {
-    tupleByteArray = Arrays.copyOfRange(byteArray, from, to);
+    data = Arrays.copyOfRange(byteArray, from, to);
   }
 
   public Tuple() {
-    tupleByteArray = new byte[MAX_TUPSIZE];
+    data = new byte[MAX_TUPSIZE];
   }
 
   public int getLength() {
-    return tupleByteArray.length;
+    return data.length;
   }
 
   public byte[] getTupleByteArray() {
-    return tupleByteArray;
+    return data;
   }
 }

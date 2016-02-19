@@ -19,8 +19,6 @@ import com.sun.net.httpserver.Filter;
 
 /**
  * Create a new HeapFile opject
- *  
- * @exception IOException 
  **/
 public class HeapFile implements GlobalConst {
 
@@ -251,23 +249,29 @@ public class HeapFile implements GlobalConst {
     HFPage page = new HFPage();
     HFPage header = new HFPage();
     Minibase.BufferManager.pinPage(firstid, header, false);
-
     RID keyrec = header.firstRecord();
-    RID valuerec = header.nextRecord(keyrec);
+    RID valuerec = null;
+
+    if (keyrec != null) {
+      valuerec = header.nextRecord(keyrec);
+    }
+
 
     for ( Map.Entry<Short, PageId> entry : directory.entrySet()) {
       byte[] keydata = new byte[2];
       byte[] valuedata = new byte[4];
       Convert.setShortValue(entry.getKey(), 0, keydata);
       Convert.setIntValue(entry.getValue().pid, 0, valuedata);
-      Tuple keytup = new Tuple(keydata, 0 , keydata.length);
-      Tuple valuetup = new Tuple(valuedata, 0 , valuedata.length);
+      Tuple keytup = new Tuple(keydata, 0, keydata.length);
+      Tuple valuetup = new Tuple(valuedata, 0, valuedata.length);
 
-      if (header.selectRecord(keyrec) != null && header.selectRecord(valuerec) != null) {
+      if (keyrec == null) {
+        header.insertRecord(keydata);
+        header.insertRecord(valuedata);
+      } else if (header.selectRecord(keyrec) != null && header.selectRecord(valuerec) != null) {
         header.updateRecord(keyrec, keytup);
         header.updateRecord(valuerec, valuetup);
-      }
-      else if (header.getNextPage() != null) {
+      } else if (header.getNextPage() != null) {
         Minibase.BufferManager.pinPage(header.getNextPage(), header, false);
         Minibase.BufferManager.unpinPage(header.getPrevPage(), true);
 
@@ -276,10 +280,16 @@ public class HeapFile implements GlobalConst {
           header.updateRecord(valuerec, valuetup);
         }
       }
-      
-      keyrec = header.nextRecord(valuerec);
-      valuerec = header.nextRecord(keyrec);
+
+      if (valuerec != null) {
+        keyrec = header.nextRecord(valuerec);
+        if(keyrec == null)
+          keyrec = header.firstRecord();
+        valuerec = header.nextRecord(keyrec);
+      }
     }
+    Minibase.BufferManager.unpinPage(header.getCurPage(), true);
+
 
   }
 }
