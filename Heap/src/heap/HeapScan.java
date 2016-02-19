@@ -30,7 +30,6 @@ public class HeapScan implements GlobalConst {
 
     public void close() throws ChainException {
         Minibase.BufferManager.unpinPage(mFirstPage, false);
-        Minibase.BufferManager.unpinPage(mCurrentPage, false);
     }
 
     public Tuple getNext(RID rid) {
@@ -61,13 +60,13 @@ public class HeapScan implements GlobalConst {
                 Minibase.BufferManager.unpinPage(pinnedCurrentPage, false);
                 Minibase.BufferManager.unpinPage(mCurrentPage, false);
 
-                if(hasNext() == false) {
-                    try {
-                        close();
-                    } catch (ChainException e) {
-                        e.printStackTrace();
-                    }
-                }
+//                if(hasNext() == false) {
+//                    try {
+//                        close();
+//                    } catch (ChainException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
                 return t;
             } else {
                 if(foopage != null && !foopage.hasNext(mCurrentRecord)) {
@@ -85,17 +84,17 @@ public class HeapScan implements GlobalConst {
                 int length = page.selectRecord(mCurrentRecord).length;
                 Tuple t = new Tuple(page.selectRecord(mCurrentRecord), 0, length);
 
-                if(pinnedCurrentPage != null)
-                    Minibase.BufferManager.unpinPage(pinnedCurrentPage, false);
+//                if(pinnedCurrentPage != null)
+//                    Minibase.BufferManager.unpinPage(pinnedCurrentPage, false);
                 Minibase.BufferManager.unpinPage(mCurrentPage, false);
 
-                if(hasNext() == false) {
-                    try {
-                        close();
-                    } catch (ChainException e) {
-                        e.printStackTrace();
-                    }
-                }
+//                if(hasNext() == false) {
+//                    try {
+//                        close();
+//                    } catch (ChainException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
                 return t;
             }
             //if current page is valid.
@@ -108,8 +107,14 @@ public class HeapScan implements GlobalConst {
                 //getRecord
                 //return
 
-        } else
+        } else {
+            try {
+                close();
+            } catch (ChainException e) {
+                e.printStackTrace();
+            }
             return null;
+        }
     }
 
     public boolean hasNext() {
