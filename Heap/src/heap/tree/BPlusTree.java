@@ -1,21 +1,13 @@
 package heap.tree;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Vector;
 
 class BPlusTree {
 
     private static Node tree;
     private static int degree;
-    private static boolean debug;
 
     private BPlusTree(int x) {
         // a B+ Tree must have an initial degree
@@ -24,48 +16,6 @@ class BPlusTree {
         // The initial type of Node for a B+Tree is a leaf
         tree = new LeafNode(degree);
 
-        debug = false;
-    }
-
-    private static void executeCommand(Command c, BufferedWriter output) throws InvalidCommandException, IOException {
-        // execute command, does as it says, calls the appropriate procedure to accomplish the command
-        // There are also some debug options to help the user see what's going on
-        switch( (int) c.getCommand() ) {
-            case 'd':
-                if( c.getXValue() == 1 && !debug) {
-                    debug = true;
-                    System.out.println("ENTERING DEBUG MODE");
-                }
-                else if ( c.getXValue() == 0 && debug) {
-                    debug = false;
-                    System.out.println("EXITTING DEBUG MODE");
-                }
-                else if (c.getXValue() != 0 || c.getXValue() != 1){
-                    throw new InvalidCommandException("Invalid Operand with command d. Must be 0 or 1.");
-                }
-            case 'p':
-                if(debug) {
-                    System.out.println("PRINTING TREE");
-                }
-                printTree(output);
-                break;
-            case 's':
-                if(debug) {
-                    System.out.println("SEARCHING TREE FOR x = " + c.getXValue());
-                }
-                searchTree(c.getXValue(), output);
-                break;
-            case 'i':
-                if(debug) {
-                    System.out.println("INSERTING x = " + c.getXValue() + " INTO THE TREE");
-                }
-                insertIntoTree(new DataNode(c.getXValue()));
-                break;
-        }
-        if(debug && (int)c.getCommand() != 'p') {
-            printTree(new BufferedWriter(new PrintWriter(System.out)));
-            System.out.println("--->OPERATION COMPLETE");
-        }
     }
 
     private static void insertIntoTree(DataNode dnode) {
@@ -127,81 +77,5 @@ class BPlusTree {
             nodeList = nextLevelList;
         }
     }
-
-    private static void readDegree(BufferedReader in) {
-        // get the tree's degree from input
-        try {
-            int x = Integer.parseInt(in.readLine().trim());
-
-            // set the degree of the tree
-            new BPlusTree(x);
-
-        } catch (Exception e1) {
-            System.err.println("degree could not be read... defaulting to order 3");
-            new BPlusTree(3);
-        }
-    }
-
-    public static void main(String[] args) throws IOException {
-        // if there are too many arguments error
-        if(args.length > 1) {
-            System.err.println("Syntax error in call sequence, use:\n\tjava BplusTree");
-        }
-        else {
-
-            // declare a reader on Standard in, incase the file reader fails
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-
-            // create a new file to store output
-            BufferedWriter output = new BufferedWriter( new FileWriter(new File("bplustree.out")) );
-            try {
-                in = new BufferedReader(new InputStreamReader(new FileInputStream("bplustree.inp")));
-            } catch (FileNotFoundException e) {
-                System.err.println("Error: specified file not found (defaulting to standard input)");
-            }
-
-            // get the degree of the B+Tree
-            readDegree(in);
-
-            // declare a new command object
-            Command c = new Command();
-
-            // continue executing commands until quit is reached
-            while(c.getCommand() != 'q') {
-                try {
-                    // read a command from input
-                    c.readCommand(in);
-
-                    // execute the command
-                    executeCommand(c, output);
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
-                catch (InvalidCommandException e) {
-                    System.err.println(e.getMessage());
-                    System.out.println("Valid Query-Modes:\n\ti x - insert x into tree\n\ts x - find x in tree\n\tp   - print tree\n\tq   - quit");
-                }
-                catch (NumberFormatException e) {
-                    System.err.println("This type of command requires a integer operand");
-                    System.out.println("Valid Query-Modes:\n\ti x - insert x into tree\n\ts x - find x in tree\n\tp   - print tree\n\tq   - quit");
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                    System.exit(-1);
-                }
-            }
-
-            // close input and output
-            output.close();
-            in.close();
-
-            // output.write("Exitting");
-            System.exit(0);
-        }
-    }
 }
-
-// The node class is an abstract class
-// its subclasses are LeafNode and TreeNode
 
