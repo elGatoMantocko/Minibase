@@ -19,14 +19,11 @@ public class HeapScan implements GlobalConst {
 
     PageId mFirstPage;
 
+    PageId mCurrentPage;
+
     protected HeapScan(HeapFile hf) {
         mHeapFile = hf;
         mPagesItr = hf.getDirectory().values().iterator();
-
-        HFPage page = new HFPage();
-        mFirstPage = mPagesItr.next();
-        Minibase.BufferManager.pinPage(mFirstPage, page, false);
-        mCurrentRecord = page.firstRecord();
     }
 
     public void close() throws ChainException {
@@ -36,31 +33,50 @@ public class HeapScan implements GlobalConst {
     public Tuple getNext(RID rid) {
 
         if(hasNext()) {
-            HFPage page = new HFPage();
-            Minibase.BufferManager.pinPage(mCurrentRecord.pageno, page, false);
-            if(page.hasNext(mCurrentRecord)) {
+            if(mCurrentPage != null && mCurrentRecord != null) {
+                HFPage page = new HFPage();
+
+                Minibase.BufferManager.pinPage(mCurrentPage, page, false);
+
+                RID toReturn = page.nextRecord(mCurrentRecord);
+                rid.copyRID(toReturn);
+
+                int length = page.selectRecord(toReturn).length;
+                Tuple t = new Tuple(page.selectRecord(toReturn), 0, length);
+
+                mCurrentRecord = toReturn;
+                return t;
+            } else {
+                mCurrentPage = mPagesItr.next();
+                HFPage page = new HFPage();
+
+                Minibase.BufferManager.pinPage(mCurrentPage, page, false);
+
+                mCurrentRecord = page.firstRecord();
 
                 rid.copyRID(mCurrentRecord);
+
                 int length = page.selectRecord(mCurrentRecord).length;
                 Tuple t = new Tuple(page.selectRecord(mCurrentRecord), 0, length);
 
-                mCurrentRecord = page.nextRecord(mCurrentRecord);
                 return t;
-            } else {
-                Minibase.BufferManager.unpinPage(mCurrentRecord.pageno, false);
-
-                PageId pid = mPagesItr.next();
-                Minibase.BufferManager.pinPage(pid, page, false);
-                mCurrentRecord = page.firstRecord();
-                Minibase.BufferManager.unpinPage(pid, false);
-
-                return getNext(rid);
             }
+            //if current page is valid.
+                //page.nextRecord()
+                //return
+            //else not valid
+                //pagesitr.nextPage()
+                //pin
+                //record = first record
+                //getRecord
+                //return
         } else
             return null;
     }
 
     public boolean hasNext() {
+        if(mCurrentRecord == null) return true;
+
         HFPage page = new HFPage();
         Minibase.BufferManager.pinPage(mCurrentRecord.pageno, page, false);
         if(page.hasNext(mCurrentRecord)) {
