@@ -29,7 +29,6 @@ public class HeapScan implements GlobalConst {
     }
 
     public void close() throws ChainException {
-        Minibase.BufferManager.unpinPage(mFirstPage, false);
     }
 
     public Tuple getNext(RID rid) {
@@ -108,11 +107,7 @@ public class HeapScan implements GlobalConst {
                 //return
 
         } else {
-            try {
-                close();
-            } catch (ChainException e) {
-                e.printStackTrace();
-            }
+            Minibase.BufferManager.unpinPage(mFirstPage, false);
             return null;
         }
     }
