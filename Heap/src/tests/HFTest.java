@@ -26,6 +26,8 @@ class HFDriver extends TestDriver implements GlobalConst
 	private int choice;
 	private final static int reclen = 32;
 
+	HeapFile f = null;
+
 	public HFDriver () {
 		super("hptest");
 		choice = 100;      // big enough for file to occupy > 1 data page
@@ -98,7 +100,6 @@ class HFDriver extends TestDriver implements GlobalConst
 		System.out.println ("\n  Test 1: Insert and scan fixed-size records\n");
 		boolean status = OK;
 		RID rid = new RID();
-		HeapFile f = null;
 
 		System.out.println ("  - Create a heap file\n");
 		try {
@@ -275,11 +276,10 @@ class HFDriver extends TestDriver implements GlobalConst
 		boolean status = OK;
 		HeapScan scan = null;
 		RID rid = new RID();
-		HeapFile f = null;
 
 		System.out.println ("  - Open the same heap file as test 1\n");
 		try {
-			f = new HeapFile("file_1");
+			//f = new HeapFile("file_1");
 		}
 		catch (Exception e) {
 			status = FAIL;
@@ -422,11 +422,11 @@ class HFDriver extends TestDriver implements GlobalConst
 		boolean status = OK;
 		HeapScan scan = null;
 		RID rid = new RID();
-		HeapFile f = null; 
+		//HeapFile f = null;
 
 		System.out.println ("  - Open the same heap file as tests 1 and 2\n");
 		try {
-			f = new HeapFile("file_1");
+			//f = new HeapFile("file_1");
 		}
 		catch (Exception e) {
 			status = FAIL;
@@ -615,10 +615,10 @@ class HFDriver extends TestDriver implements GlobalConst
 		boolean status = OK;
 		HeapScan scan = null;
 		RID rid = new RID();
-		HeapFile f = null; 
+		//HeapFile f = null;
 
 		try {
-			f = new HeapFile ("file_1");
+			//f = new HeapFile ("file_1");
 		}
 		catch (Exception e) {
 			status = FAIL;
