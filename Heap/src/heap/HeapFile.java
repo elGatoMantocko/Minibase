@@ -23,7 +23,7 @@ import com.sun.net.httpserver.Filter;
  * @exception IOException 
  **/
 public class HeapFile implements GlobalConst {
-  private HFPage hfpage;
+
   private PageId firstid;
 
   private String filename;
@@ -37,25 +37,57 @@ public class HeapFile implements GlobalConst {
     // <available_space, pageno>
     directory = new MultipleValueTreeMap();
     this.filename = name;
-    boolean exists = true;
 
-    if (name != null) {
-      Page p = new Page();
+    if (filename != null) {
+      HFPage page = new HFPage();
 
       try {
-        firstid = Minibase.DiskManager.get_file_entry(name);
+        // see if there is already a heapfile with the name
+        firstid = Minibase.DiskManager.get_file_entry(filename);
+
+        // if not
         if (firstid == null) {
-          firstid = Minibase.BufferManager.newPage(p, 1);
-          Minibase.DiskManager.add_file_entry(filename, firstid);
+          // create the first directory page
+          firstid = Minibase.BufferManager.newPage(page, 1);
 
-          HFPage hfp = new HFPage(p);
-          hfp.setCurPage(firstid);
-
+          // hook up the first page
+          page.setCurPage(firstid);
           PageId badPID = new PageId(INVALID_PAGEID);
-          hfp.setNextPage(badPID);
-          hfp.setPrevPage(badPID);
+          page.setNextPage(badPID);
+          page.setPrevPage(badPID);
 
           Minibase.BufferManager.unpinPage(firstid, true);
+
+          // add the file to the database
+          Minibase.DiskManager.add_file_entry(filename, firstid);
+        }
+        else {
+          // pin the first page
+          Minibase.BufferManager.pinPage(firstid, page, false);
+
+          PageId currentPid = firstid;
+          RID keyrec = page.firstRecord();
+          RID valuerec = page.nextRecord(keyrec);
+          while (keyrec != null) {
+            if (valuerec != null) {
+              directory.put(Convert.getShortValue(0, page.selectRecord(keyrec)), new PageId(Convert.getIntValue(0, page.selectRecord(valuerec))));
+            }
+            if (page.hasNext(valuerec)) {
+              keyrec = page.nextRecord(valuerec);
+              valuerec = page.nextRecord(keyrec);
+            }
+            else if (page.getNextPage() != null) {
+              // we found another page
+              currentPid = page.getNextPage();
+              Minibase.BufferManager.unpinPage(page.getCurPage(), false);;
+              Minibase.BufferManager.pinPage(currentPid, page, false);
+              keyrec = page.firstRecord();
+              valuerec = page.nextRecord(keyrec);
+            }
+          }
+          
+          Minibase.BufferManager.unpinPage(page.getCurPage(), false);;
+
         }
       } catch(Exception e){
         e.printStackTrace();
@@ -124,6 +156,7 @@ public class HeapFile implements GlobalConst {
     }
 
     reccnt += 1;
+    writeHeader();
     return newRecord;
   }
 
@@ -136,6 +169,7 @@ public class HeapFile implements GlobalConst {
       byte[] rec = page.selectRecord(rid);
       Tuple t = new Tuple(rec, 0, rec.length);
       Minibase.BufferManager.unpinPage(pid, false);
+      writeHeader();
       return t;
     } catch(Exception e){
       e.printStackTrace();
@@ -169,6 +203,7 @@ public class HeapFile implements GlobalConst {
       Minibase.BufferManager.unpinPage(rid.pageno, true);
     }
 
+    writeHeader();
     return true;
   }
 
@@ -181,6 +216,10 @@ public class HeapFile implements GlobalConst {
       directory.remove(currentPage.getFreeSpace(), rid.pageno);
 
       currentPage.deleteRecord(rid);
+
+      if (currentPage.getSlotCount() < 1) {
+        Minibase.DiskManager.deallocate_page(rid.pageno);
+      }
 
       directory.put(currentPage.getFreeSpace(), rid.pageno);
 
@@ -206,6 +245,42 @@ public class HeapFile implements GlobalConst {
 
   public MultipleValueTreeMap getDirectory() {
     return directory;
+  }
+
+  private void writeHeader() {
+    HFPage page = new HFPage();
+    HFPage header = new HFPage();
+    Minibase.BufferManager.pinPage(firstid, header, false);
+
+    RID keyrec = header.firstRecord();
+    RID valuerec = header.nextRecord(keyrec);
+
+    for ( Map.Entry<Short, PageId> entry : directory.entrySet()) {
+      byte[] keydata = new byte[2];
+      byte[] valuedata = new byte[4];
+      Convert.setShortValue(entry.getKey(), 0, keydata);
+      Convert.setIntValue(entry.getValue().pid, 0, valuedata);
+      Tuple keytup = new Tuple(keydata, 0 , keydata.length);
+      Tuple valuetup = new Tuple(valuedata, 0 , valuedata.length);
+
+      if (header.selectRecord(keyrec) != null && header.selectRecord(valuerec) != null) {
+        header.updateRecord(keyrec, keytup);
+        header.updateRecord(valuerec, valuetup);
+      }
+      else if (header.getNextPage() != null) {
+        Minibase.BufferManager.pinPage(header.getNextPage(), header, false);
+        Minibase.BufferManager.unpinPage(header.getPrevPage(), true);
+
+        if (header.selectRecord(keyrec) != null) {
+          header.updateRecord(keyrec, keytup);
+          header.updateRecord(valuerec, valuetup);
+        }
+      }
+      
+      keyrec = header.nextRecord(valuerec);
+      valuerec = header.nextRecord(keyrec);
+    }
+
   }
 }
 
